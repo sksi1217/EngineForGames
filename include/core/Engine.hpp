@@ -8,14 +8,14 @@
 #include <libs/imgui/backends/imgui_impl_opengl3.h>
 
 // --
-#include <include/core/GameWindow.hpp>
+#include <include/core/EngineState.hpp>
 #include <include/core/EventSystem.hpp>
+#include <include/core/GameWindow.hpp>
 #include <include/core/GameObject.hpp>
 
 #include <src/utils/Logger.hpp>
 #include <src/utils/Time.hpp>
 #include <src/utils/TextureLoader.hpp>
-#include <src/utils/ShaderLoader.hpp>
 
 #include <src/graphics/GLContext.hpp>
 
@@ -32,16 +32,12 @@ public:
 	std::vector<std::shared_ptr<GameObject>> gameObj;
 
 private:
-	EventSystem events;
 	GameWindow *m_Window;
 	GLContext glContext;
-
-	bool m_ShowDebugUI = true;
-	bool m_Running = true;
+	EngineState m_State;
+	EventSystem events;
 
 	void Initialize();
 	void Update();
 	void Draw();
-
-	void SetupCallbacks();
 };

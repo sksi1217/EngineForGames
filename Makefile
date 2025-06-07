@@ -19,8 +19,10 @@ SRCS = sandbox/main.cpp \
 	src/core/GameObject.cpp \
 	include/graphics/Renderer.cpp \
 	src/utils/TextureLoader.cpp \
-	src/utils/ShaderLoader.cpp \
 	src/graphics/Shader.cpp \
+	src/utils/ShaderManager.cpp \
+	src/core/Settings.cpp \
+	src/core/EventSystem.cpp \
 
 # Компилятор
 CXX = g++

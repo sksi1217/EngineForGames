@@ -32,10 +32,12 @@ GameWindow::GameWindow(const std::string &title, int width, int height) : m_Titl
 
 	glfwMakeContextCurrent(m_Window);
 	glfwSwapInterval(m_VSync ? 1 : 0);
+}
 
-	// ! Сохраняем указатель на наш объект Window
-	glfwSetWindowUserPointer(m_Window, this);
-	utils::Logger::info("GLFW window created successfully");
+GameWindow &GameWindow::Get()
+{
+	static GameWindow instance;
+	return instance;
 }
 
 GameWindow::~GameWindow()
@@ -197,365 +199,178 @@ std::string GameWindow::GetTitle() const
 
 #pragma endregion
 
-// ! Статические обработчики GLFW
-#pragma region Статические обработчики GLFW
-
-void GameWindow::GLFWKeyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
+// ! Настройки
+#pragma region Настройки
+void GameWindow::ApplySettings(const Settings &settings)
 {
-	GameWindow *win = static_cast<GameWindow *>(glfwGetWindowUserPointer(window));
-	if (!win)
-		return;
-
-	for (const auto &[id, callback] : win->m_KeyCallbacks)
+	// ! Графические настройки
+	if (!m_Window)
 	{
-		if (callback)
+		utils::Logger::error("Window not initialized");
+		return;
+	}
+
+	GLFWmonitor *monitor = nullptr;
+
+	if (settings.graphics.fullscreen)
+	{
+		int monitorCount;
+		GLFWmonitor **monitors = glfwGetMonitors(&monitorCount);
+
+		if (monitorCount > 0 && settings.graphics.monitorIndex >= 0 &&
+			settings.graphics.monitorIndex < monitorCount)
 		{
-			try
-			{
-				callback(key, scancode, action, mods);
-			}
-			catch (const std::exception &e)
-			{
-				std::cerr << "Key callback error: " << e.what() << std::endl;
-			}
+			monitor = monitors[settings.graphics.monitorIndex];
+		}
+		else
+		{
+			std::stringstream ss;
+			ss << "Invalid monitor index: " << settings.graphics.monitorIndex << "Using primary monitor." << settings.graphics.resolution.y;
+			utils::Logger::error(ss.str());
+			monitor = glfwGetPrimaryMonitor(); // fallback
 		}
 	}
-}
 
-void GameWindow::GLFWMouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
-{
-	GameWindow *win = static_cast<GameWindow *>(glfwGetWindowUserPointer(window));
-	if (!win)
-		return;
-
-	for (const auto &[id, callback] : win->m_MouseButtonCallbacks)
+	// Проверка поддержки разрешения в полноэкранном режиме
+	if (monitor)
 	{
-		if (callback)
+		int modeCount;
+		const GLFWvidmode *modes = glfwGetVideoModes(monitor, &modeCount);
+		bool resolutionSupported = false;
+
+		for (int i = 0; i < modeCount; ++i)
 		{
-			try
+			if (modes[i].width == settings.graphics.resolution.x &&
+				modes[i].height == settings.graphics.resolution.y)
 			{
-				callback(button, action, mods);
-			}
-			catch (const std::exception &e)
-			{
-				std::cerr << "Mouse button callback error: " << e.what() << std::endl;
+				resolutionSupported = true;
+				break;
 			}
 		}
-	}
-}
 
-void GameWindow::GLFWCursorPosCallback(GLFWwindow *window, double x, double y)
-{
-	GameWindow *win = static_cast<GameWindow *>(glfwGetWindowUserPointer(window));
-	if (!win)
-		return;
-
-	for (const auto &[id, callback] : win->m_MousePosCallbacks)
-	{
-		if (callback)
+		if (!resolutionSupported)
 		{
-			try
-			{
-				callback(x, y);
-			}
-			catch (const std::exception &e)
-			{
-				std::cerr << "Mouse position callback error: " << e.what() << std::endl;
-			}
+			std::stringstream ss;
+			ss << "Unsupported fullscreen resolution: " << settings.graphics.resolution.x << "x" << settings.graphics.resolution.y;
+			utils::Logger::error(ss.str());
 		}
 	}
-}
 
-void GameWindow::GLFWScrollCallback(GLFWwindow *window, double xoffset, double yoffset)
-{
-	GameWindow *win = static_cast<GameWindow *>(glfwGetWindowUserPointer(window));
-	if (!win)
-		return;
+	GLFWwindow *currentContext = glfwGetCurrentContext();
+	glfwMakeContextCurrent(m_Window);
+	glFinish();
 
-	for (const auto &[id, callback] : win->m_MouseScrollCallbacks)
+	try
 	{
-		if (callback)
-		{
-			try
-			{
-				callback(xoffset, yoffset);
-			}
-			catch (const std::exception &e)
-			{
-				std::cerr << "Mouse scroll callback error: " << e.what() << std::endl;
-			}
-		}
+		const GLFWvidmode *targetMode = monitor ? glfwGetVideoMode(monitor) : nullptr;
+
+		glfwSetWindowMonitor(
+			m_Window,
+			monitor,
+			0, 0,
+			settings.graphics.resolution.x,
+			settings.graphics.resolution.y,
+			monitor && targetMode ? targetMode->refreshRate : GLFW_DONT_CARE);
+
+		glViewport(0, 0, settings.graphics.resolution.x, settings.graphics.resolution.y);
 	}
-}
-
-void GameWindow::GLFWWindowSizeCallback(GLFWwindow *window, int width, int height)
-{
-	GameWindow *win = static_cast<GameWindow *>(glfwGetWindowUserPointer(window));
-	if (!win)
-		return;
-
-	for (const auto &[id, callback] : win->m_WindowSizeCallbacks)
+	catch (const std::exception &e)
 	{
-		if (callback)
-		{
-			try
-			{
-				callback(width, height);
-			}
-			catch (const std::exception &e)
-			{
-				std::cerr << "Window size callback error: " << e.what() << std::endl;
-			}
-		}
+		std::stringstream ss;
+		ss << "Failed to apply window settings: " << e.what();
+		utils::Logger::error(ss.str());
 	}
-}
-
-void GameWindow::GLFWCharCallback(GLFWwindow *window, unsigned int codepoint)
-{
-	GameWindow *win = static_cast<GameWindow *>(glfwGetWindowUserPointer(window));
-	if (!win)
-		return;
-
-	for (const auto &[id, callback] : win->m_CharCallbacks)
+	catch (...)
 	{
-		if (callback)
-		{
-			try
-			{
-				callback(codepoint);
-			}
-			catch (const std::exception &e)
-			{
-				std::cerr << "Char callback error: " << e.what() << std::endl;
-			}
-		}
+		utils::Logger::error("Unknown error while applying window settings");
 	}
-}
 
+	glfwMakeContextCurrent(currentContext);
+	SetVSync(settings.graphics.vsync);
+
+	// ! Применение звуковых настроек
+	ApplyAudioSettings(settings.audio);
+
+	// ! Применение настроек управления
+	ApplyControlSettings(settings.controls);
+
+	// ! Применение настроек интерфейса
+	ApplyUISettings(settings.ui);
+
+	// ! Применение игровых настроек
+	ApplyGameSettings(settings.game);
+
+	// ! Применение расширенных настроек
+	ApplyAdvancedSettings(settings.advanced);
+}
 #pragma endregion
 
-// ! Регистрация callback
-#pragma region Регистрация callback
-
-// --- Клавиатура ---
-GameWindow::CallbackID GameWindow::AddKeyCallback(const KeyCallback &callback)
+void GameWindow::ApplyAudioSettings(const AudioSettings &audio)
 {
-	utils::Logger::debug("Registering new key callback");
+	/*
+	// Пример: установка громкости через аудио-движок
+	AudioEngine::SetMasterVolume(audio.masterVolume);
+	AudioEngine::SetMusicVolume(audio.musicVolume);
+	AudioEngine::SetEffectsVolume(audio.effectsVolume);
+	AudioEngine::SetVoiceVolume(audio.voiceVolume);
 
-	if (m_KeyCallbacks.empty())
+	// Режим вывода
+	switch (audio.outputMode)
 	{
-		glfwSetKeyCallback(m_Window, GLFWKeyCallback);
+	case AudioSettings::MONO:
+		AudioEngine::SetOutputMode(Mono);
+		break;
+	case AudioSettings::STEREO:
+		AudioEngine::SetOutputMode(Stereo);
+		break;
+	case AudioSettings::SURROUND:
+		AudioEngine::SetOutputMode(Surround);
+		break;
 	}
 
-	CallbackID id = m_NextCallbackID++;
-	m_KeyCallbacks[id] = callback;
-	return id;
+	AudioEngine::MuteAll(audio.muteAll);
+	*/
 }
 
-bool GameWindow::RemoveKeyCallback(CallbackID id)
+void GameWindow::ApplyControlSettings(const ControlsSettings &controls)
 {
-	auto it = m_KeyCallbacks.find(id);
-	if (it != m_KeyCallbacks.end())
-	{
-		utils::Logger::debug("Removing key callback with ID: " + std::to_string(id));
-		m_KeyCallbacks.erase(it);
+	/*
+	InputManager::SetKeyBinding("MoveForward", controls.moveForward);
+	InputManager::SetKeyBinding("MoveBack", controls.moveBack);
+	InputManager::SetKeyBinding("MoveLeft", controls.moveLeft);
+	InputManager::SetKeyBinding("MoveRight", controls.moveRight);
+	InputManager::SetKeyBinding("Jump", controls.jump);
+	InputManager::SetKeyBinding("Interact", controls.interact);
 
-		if (m_KeyCallbacks.empty())
-		{
-			glfwSetKeyCallback(m_Window, nullptr);
-		}
-		return true;
-	}
-	utils::Logger::warning("Failed to remove key callback with ID: " + std::to_string(id));
-
-	return false;
+	InputManager::SetMouseSensitivity(controls.mouseSensitivity);
+	InputManager::SetInvertYAxis(controls.invertYAxis);
+	*/
 }
 
-void GameWindow::ClearKeyCallbacks()
+void GameWindow::ApplyUISettings(const UISettings &ui)
 {
-	m_KeyCallbacks.clear();
-	glfwSetKeyCallback(m_Window, nullptr);
+	/*
+	UIRenderer::SetScale(ui.uiScale);
+	UIRenderer::SetHudTransparency(ui.hudTransparency);
+	UIRenderer::SetLanguage(ui.language);
+	UIRenderer::SetShowHints(ui.showHints);
+	UIRenderer::SetHideHUDInGame(ui.hideHUDInGame);
+	UIRenderer::SetAutoScaleUI(ui.autoScaleUI);
+	*/
 }
 
-// --- Клики мыши ---
-GameWindow::CallbackID GameWindow::AddMouseButtonCallback(const MouseButtonCallback &callback)
+void GameWindow::ApplyGameSettings(const GameSettings &game)
 {
-	if (m_MouseButtonCallbacks.empty())
-	{
-		glfwSetMouseButtonCallback(m_Window, GLFWMouseButtonCallback);
-	}
-
-	CallbackID id = m_NextCallbackID++;
-	m_MouseButtonCallbacks[id] = callback;
-	return id;
+	/*
+	GameplaySystem::SetAutoSaveEnabled(game.autoSave);
+	MapSystem::SetMinimapVisible(game.showMinimap);
+	*/
 }
 
-bool GameWindow::RemoveMouseButtonCallback(CallbackID id)
+void GameWindow::ApplyAdvancedSettings(const AdvancedSettings &advanced)
 {
-	auto it = m_MouseButtonCallbacks.find(id);
-	if (it != m_MouseButtonCallbacks.end())
-	{
-		m_MouseButtonCallbacks.erase(it);
-
-		if (m_MouseButtonCallbacks.empty())
-		{
-			glfwSetMouseButtonCallback(m_Window, nullptr);
-		}
-		return true;
-	}
-	return false;
+	/*
+	DebugConsole::SetEnabled(advanced.developerMode);
+	Profiler::SetEnabled(advanced.developerMode);
+	*/
 }
-
-void GameWindow::ClearMouseButtonCallbacks()
-{
-	m_MouseButtonCallbacks.clear();
-	glfwSetMouseButtonCallback(m_Window, nullptr);
-}
-
-// --- Перемещение курсора ---
-GameWindow::CallbackID GameWindow::AddMousePosCallback(const MousePosCallback &callback)
-{
-	if (m_MousePosCallbacks.empty())
-	{
-		glfwSetCursorPosCallback(m_Window, GLFWCursorPosCallback);
-	}
-
-	CallbackID id = m_NextCallbackID++;
-	m_MousePosCallbacks[id] = callback;
-	return id;
-}
-
-bool GameWindow::RemoveMousePosCallback(CallbackID id)
-{
-	auto it = m_MousePosCallbacks.find(id);
-	if (it != m_MousePosCallbacks.end())
-	{
-		m_MousePosCallbacks.erase(it);
-
-		if (m_MousePosCallbacks.empty())
-		{
-			glfwSetCursorPosCallback(m_Window, nullptr);
-		}
-		return true;
-	}
-	return false;
-}
-
-void GameWindow::ClearMousePosCallbacks()
-{
-	m_MousePosCallbacks.clear();
-	glfwSetCursorPosCallback(m_Window, nullptr);
-}
-
-// --- Прокрутка колеса мыши ---
-GameWindow::CallbackID GameWindow::AddMouseScrollCallback(const MouseScrollCallback &callback)
-{
-	if (m_MouseScrollCallbacks.empty())
-	{
-		glfwSetScrollCallback(m_Window, GLFWScrollCallback);
-	}
-
-	CallbackID id = m_NextCallbackID++;
-	m_MouseScrollCallbacks[id] = callback;
-	return id;
-}
-
-bool GameWindow::RemoveMouseScrollCallback(CallbackID id)
-{
-	auto it = m_MouseScrollCallbacks.find(id);
-	if (it != m_MouseScrollCallbacks.end())
-	{
-		m_MouseScrollCallbacks.erase(it);
-
-		if (m_MouseScrollCallbacks.empty())
-		{
-			glfwSetScrollCallback(m_Window, nullptr);
-		}
-		return true;
-	}
-	return false;
-}
-
-void GameWindow::ClearMouseScrollCallbacks()
-{
-	m_MouseScrollCallbacks.clear();
-	glfwSetScrollCallback(m_Window, nullptr);
-}
-
-// --- Изменение размера окна ---
-GameWindow::CallbackID GameWindow::AddWindowSizeCallback(const WindowSizeCallback &callback)
-{
-	if (m_WindowSizeCallbacks.empty())
-	{
-		glfwSetWindowSizeCallback(m_Window, GLFWWindowSizeCallback);
-	}
-
-	CallbackID id = m_NextCallbackID++;
-	m_WindowSizeCallbacks[id] = callback;
-	return id;
-}
-
-bool GameWindow::RemoveWindowSizeCallback(CallbackID id)
-{
-	auto it = m_WindowSizeCallbacks.find(id);
-	if (it != m_WindowSizeCallbacks.end())
-	{
-		m_WindowSizeCallbacks.erase(it);
-
-		if (m_WindowSizeCallbacks.empty())
-		{
-			glfwSetWindowSizeCallback(m_Window, nullptr);
-		}
-		return true;
-	}
-	return false;
-}
-
-void GameWindow::ClearWindowSizeCallbacks()
-{
-	m_WindowSizeCallbacks.clear();
-	glfwSetWindowSizeCallback(m_Window, nullptr);
-}
-
-// Регистрация callback'а для ввода символов
-GameWindow::CallbackID GameWindow::AddCharCallback(const CharCallback &callback)
-{
-	utils::Logger::debug("Registering new char callback");
-
-	if (m_CharCallbacks.empty())
-	{
-		glfwSetCharCallback(m_Window, GLFWCharCallback);
-	}
-
-	CallbackID id = m_NextCallbackID++;
-	m_CharCallbacks[id] = callback;
-	return id;
-}
-
-// Удаление callback'а для ввода символов
-bool GameWindow::RemoveCharCallback(CallbackID id)
-{
-	auto it = m_CharCallbacks.find(id);
-	if (it != m_CharCallbacks.end())
-	{
-		utils::Logger::debug("Removing char callback with ID: " + std::to_string(id));
-		m_CharCallbacks.erase(it);
-
-		if (m_CharCallbacks.empty())
-		{
-			glfwSetCharCallback(m_Window, nullptr);
-		}
-		return true;
-	}
-	utils::Logger::warning("Failed to remove char callback with ID: " + std::to_string(id));
-	return false;
-}
-
-// Очистка всех callback'ов для ввода символов
-void GameWindow::ClearCharCallbacks()
-{
-	m_CharCallbacks.clear();
-	glfwSetCharCallback(m_Window, nullptr);
-}
-
-#pragma endregion

@@ -8,7 +8,7 @@
 class GameObject
 {
 public:
-	GameObject(std::shared_ptr<Texture2D> texture, std::shared_ptr<Shader> shader, std::shared_ptr<Renderer> renderer);
+	GameObject(std::shared_ptr<Texture2D> texture);
 
 	void Draw();
 	void Update();
@@ -21,7 +21,7 @@ public:
 	void SetColor(const glm::vec4 &color) { m_params.color = color; }
 
 	void SetTextureSize(const glm::vec2 &textureSize) { m_params.textureSize = textureSize; }
-	//void SetTextureSize(const glm::vec2 &size) { m_params.textureSize = size; }
+	// void SetTextureSize(const glm::vec2 &size) { m_params.textureSize = size; }
 
 	void SetTextureOffset(const glm::vec2 &offset) { m_params.textureOffset = offset; }
 	void SetFlipX(bool flip) { m_params.flipX = flip; }
@@ -51,8 +51,7 @@ public:
 private:
 	Renderer::RenderParams m_params;
 	std::shared_ptr<Texture2D> m_texture;
-	std::shared_ptr<Shader> m_shader;
-	std::shared_ptr<Renderer> m_renderer;
+	// std::shared_ptr<Renderer> m_renderer;
 
 	bool m_isDragging = false;
 	glm::vec2 m_dragOffset;

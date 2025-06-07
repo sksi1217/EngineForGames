@@ -2,10 +2,21 @@
 #include <GL/glew.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <vector>
+#include <src/utils/ShaderManager.hpp>
+#include <GLFW/glfw3.h>
+#include <core/Engine.hpp>
+
+Renderer &Renderer::Get()
+{
+	static Renderer instance;
+	return instance;
+}
 
 // Конструктор: инициализация буферов и обновление проекции
 Renderer::Renderer()
 {
+	ShaderManager::Get().Init();
+
 	SetupBuffers();
 	UpdateProjection();
 }
@@ -69,25 +80,54 @@ void Renderer::SetupBuffers()
 #pragma region Обновление проекционной матрицы
 void Renderer::UpdateProjection()
 {
-	// Создаем ортографическую матрицу проекции
-	m_projection = glm::ortho(0.0f, static_cast<float>(m_viewportWidth), static_cast<float>(m_viewportHeight), 0.0f, -1.0f, 1.0f);
+	// ! Используем фиксированное "логическое" разрешение
+	const float logicalWidth = 1280.0f;
+	const float logicalHeight = 720.0f;
+
+	// ! Создаем ортографическую проекцию для логического разрешения
+	m_projection = glm::ortho(0.0f, logicalWidth, logicalHeight, 0.0f, -1.0f, 1.0f);
 }
 #pragma endregion
 
 #pragma region Установка размера области отрисовки
 void Renderer::SetViewportSize(int width, int height)
 {
-	m_viewportWidth = width;   // Сохраняем ширину
-	m_viewportHeight = height; // Сохраняем высоту
-	UpdateProjection();		   // Обновляем матрицу проекции
+	// ! Вычисляем желаемый размер viewport'а с сохранением соотношения сторон
+	float targetAspect = m_aspectRatio;
+	float windowAspect = (float)width / (float)height;
+
+	if (windowAspect > targetAspect)
+	{
+		// Окно шире, чем целевое соотношение - добавляем черные полосы по бокам
+		m_viewportSize.y = height;
+		m_viewportSize.x = height * targetAspect;
+	}
+	else
+	{
+		// Окно уже - добавляем черные полосы сверху и снизу
+		m_viewportSize.x = width;
+		m_viewportSize.y = width / targetAspect;
+	}
+
+	// Обновляем проекцию с учетом нового размера
+	UpdateProjection();
+
+	// Устанавливаем viewport с отступами
+	int viewportX = (width - m_viewportSize.x) / 2;
+	int viewportY = (height - m_viewportSize.y) / 2;
+	glViewport(viewportX, viewportY, m_viewportSize.x, m_viewportSize.y);
 }
 #pragma endregion
 
 #pragma region Основной метод отрисовки спрайта
-void Renderer::Render(const Texture2D &texture, const Shader &shader, const RenderParams &params)
+void Renderer::Render(const Texture2D &texture, const RenderParams &params)
 {
+	auto shader = ShaderManager::Get().GetDefaultShader();
+	if (!shader)
+		return;
+
 	// Активируем шейдер
-	shader.Use();
+	shader->Use();
 
 	// Привязываем текстуру
 	texture.Bind();
@@ -132,11 +172,11 @@ void Renderer::Render(const Texture2D &texture, const Shader &shader, const Rend
 	}
 
 	// Передаем данные в шейдер
-	shader.setMat4("model", model);
-	shader.setMat4("projection", m_projection);
-	shader.setVec4("spriteColor", params.color);
-	shader.setVec2("texCoordStart", texCoordStart);
-	shader.setVec2("texCoordEnd", texCoordEnd);
+	shader->setMat4("model", model);
+	shader->setMat4("projection", m_projection);
+	shader->setVec4("spriteColor", params.color);
+	shader->setVec2("texCoordStart", texCoordStart);
+	shader->setVec2("texCoordEnd", texCoordEnd);
 
 	// Выполняем отрисовку
 	glBindVertexArray(m_VAO);

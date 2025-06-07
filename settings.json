@@ -1,0 +1,51 @@
+{
+    "advanced": {
+        "developer_mode": true
+    },
+    "audio": {
+        "effects_volume": 0.30000001192092896,
+        "master_volume": 0.4189999997615814,
+        "music_volume": 0.6869999766349792,
+        "mute_all": true,
+        "output_mode": 1,
+        "voice_volume": 0.722000002861023
+    },
+    "controls": {
+        "interact": "E",
+        "invert_y": true,
+        "jump": "SPACE",
+        "mouse_sensitivity": 2.6470000743865967,
+        "move_back": "S",
+        "move_forward": "W",
+        "move_left": "A",
+        "move_right": "D"
+    },
+    "game": {
+        "auto_save": true,
+        "show_minimap": true
+    },
+    "graphics": {
+        "anti_aliasing": 4,
+        "brightness": 0.7580000162124634,
+        "contrast": 1.531000018119812,
+        "debug_wireframe": true,
+        "fps_limit": 170,
+        "fullscreen": false,
+        "gamma": 1.6369999647140503,
+        "monitor_index": 1,
+        "pixel_art_smoothing": true,
+        "resolution_x": 1280,
+        "resolution_y": 720,
+        "show_grid": true,
+        "texture_quality": 2,
+        "vsync": true
+    },
+    "ui": {
+        "auto_scale_ui": true,
+        "hide_hud_in_game": true,
+        "hud_transparency": 0.5370000004768372,
+        "language": "en",
+        "show_hints": true,
+        "ui_scale": 0.843999981880188
+    }
+}

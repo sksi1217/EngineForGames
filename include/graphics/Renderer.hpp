@@ -7,6 +7,11 @@
 class Renderer
 {
 public:
+	static Renderer &Get();
+
+	// Инициализация — загружаем рендер
+	void Init();
+
 	struct RenderParams
 	{
 		glm::vec2 position{10.0f, 10.0f};		 // Position on screen
@@ -23,14 +28,15 @@ public:
 	Renderer();
 	~Renderer();
 
-	void Render(const Texture2D &texture, const Shader &shader, const RenderParams &params);
+	void Render(const Texture2D &texture, const RenderParams &params);
 	void SetViewportSize(int width, int height);
 
 private:
 	GLuint m_VAO, m_VBO, m_EBO;
 	glm::mat4 m_projection;
-	int m_viewportWidth = 1280;
-	int m_viewportHeight = 720;
+
+	float m_aspectRatio = 16.0f / 9.0f; // Соотношение сторон по умолчанию
+	glm::vec2 m_viewportSize;			// Реальный размер viewport'а с учетом соотношения сторон
 
 	void SetupBuffers();
 	void UpdateProjection();

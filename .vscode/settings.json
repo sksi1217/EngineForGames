@@ -52,6 +52,15 @@
 		"ratio": "cpp",
 		"fstream": "cpp",
 		"iomanip": "cpp",
-		"sstream": "cpp"
+		"sstream": "cpp",
+		"filesystem": "cpp",
+		"any": "cpp",
+		"charconv": "cpp",
+		"forward_list": "cpp",
+		"map": "cpp",
+		"format": "cpp",
+		"ranges": "cpp",
+		"span": "cpp",
+		"valarray": "cpp"
 	}
 }

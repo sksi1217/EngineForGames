@@ -1,0 +1,10 @@
+[2025-06-07 13:27:36] [INFO] Log file created: logs/log_2025-06-07_13-27-36.log
+[2025-06-07 13:27:36] [INFO] Application started
+[2025-06-07 13:27:36] [INFO] Initializing GLFW...
+[2025-06-07 13:27:36] [INFO] Creating GLFW window...
+[2025-06-07 13:27:36] [INFO] Setting VSync: ON
+[2025-06-07 13:27:36] [DEBUG] OpenGL Version: 4.6 (Core Profile) Mesa 24.2.8-1ubuntu1~24.04.1
+[2025-06-07 13:27:36] [INFO] GLFW window created successfully
+[2025-06-07 13:27:36] [DEBUG] Registering new key callback
+[2025-06-07 13:27:36] [DEBUG] Registering new char callback
+[2025-06-07 13:27:42] [INFO] Shutting down engine...
