@@ -17,12 +17,13 @@ SRCS = sandbox/main.cpp \
 	libs/imgui/backends/imgui_impl_opengl3.cpp \
 	libs/imgui/backends/imgui_impl_glfw.cpp \
 	src/core/GameObject.cpp \
-	include/graphics/Renderer.cpp \
+	src/graphics/Renderer.cpp \
 	src/utils/TextureLoader.cpp \
 	src/graphics/Shader.cpp \
 	src/utils/ShaderManager.cpp \
 	src/core/Settings.cpp \
 	src/core/EventSystem.cpp \
+	src/core/SpatialPartition.cpp \
 
 # Компилятор
 CXX = g++

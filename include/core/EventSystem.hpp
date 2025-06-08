@@ -7,7 +7,7 @@
 #include <include/core/GameWindow.hpp>
 #include <include/core/EngineState.hpp>
 
-#include <src/utils/Logger.hpp>
+#include <include/utils/Logger.hpp>
 
 struct EventSystem
 {

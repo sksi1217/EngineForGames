@@ -1,7 +1,7 @@
 #pragma once
 
 #include <GLFW/glfw3.h>
-#include <src/utils/Logger.hpp>
+#include <include/utils/Logger.hpp>
 #include <include/stb_image.h>
 #include <functional>
 #include <stdexcept>

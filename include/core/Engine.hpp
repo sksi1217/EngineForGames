@@ -13,13 +13,15 @@
 #include <include/core/GameWindow.hpp>
 #include <include/core/GameObject.hpp>
 
-#include <src/utils/Logger.hpp>
-#include <src/utils/Time.hpp>
-#include <src/utils/TextureLoader.hpp>
+#include <include/core/SpatialPartitioning.hpp>
 
-#include <src/graphics/GLContext.hpp>
+#include <include/utils/Logger.hpp>
+#include <include/utils/Time.hpp>
+#include <include/utils/TextureLoader.hpp>
 
-#include <src/ui/ImGuiContext.hpp>
+#include <include/graphics/GLContext.hpp>
+
+#include <include/ui/ImGuiContext.hpp>
 
 class Engine
 {
@@ -36,6 +38,8 @@ private:
 	GLContext glContext;
 	EngineState m_State;
 	EventSystem events;
+
+	SpatialPartitioning *spatialPartitioning;
 
 	void Initialize();
 	void Update();

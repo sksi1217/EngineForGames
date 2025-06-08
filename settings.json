@@ -32,13 +32,13 @@
         "fps_limit": 170,
         "fullscreen": false,
         "gamma": 1.6369999647140503,
-        "monitor_index": 1,
+        "monitor_index": 0,
         "pixel_art_smoothing": true,
         "resolution_x": 1280,
         "resolution_y": 720,
         "show_grid": true,
         "texture_quality": 2,
-        "vsync": true
+        "vsync": false
     },
     "ui": {
         "auto_scale_ui": true,

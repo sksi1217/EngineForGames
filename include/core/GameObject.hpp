@@ -1,14 +1,22 @@
 #pragma once
 
-#include <memory>
-#include "include/graphics/Renderer.hpp"
-#include "src/graphics/Texture2D.hpp"
-#include "src/graphics/Shader.hpp"
+#include <include/graphics/Renderer.hpp>
+#include <include/graphics/Texture2D.hpp>
+#include <include/graphics/Shader.hpp>
+#include <include/core/Component.hpp>
+#include <include/utils/Logger.hpp>
+#include <include/utils/Time.hpp>
+
+#include <include/core/SpatialPartitioning.hpp>
+
+class SpatialPartitioning;
 
 class GameObject
 {
 public:
-	GameObject(std::shared_ptr<Texture2D> texture);
+	GameObject(std::shared_ptr<Texture2D> texture, SpatialPartitioning *spatial);
+
+	~GameObject();
 
 	void Draw();
 	void Update();
@@ -21,14 +29,10 @@ public:
 	void SetColor(const glm::vec4 &color) { m_params.color = color; }
 
 	void SetTextureSize(const glm::vec2 &textureSize) { m_params.textureSize = textureSize; }
-	// void SetTextureSize(const glm::vec2 &size) { m_params.textureSize = size; }
 
 	void SetTextureOffset(const glm::vec2 &offset) { m_params.textureOffset = offset; }
 	void SetFlipX(bool flip) { m_params.flipX = flip; }
 	void SetFlipY(bool flip) { m_params.flipY = flip; }
-
-	void OnMouseClick(float mouseX, float mouseY, bool isPressed);
-	void OnMouseMove(float mouseX, float mouseY);
 
 	// Методы обработки текстурных областей
 	void SetTextureRegion(const glm::vec2 &offset, const glm::vec2 &size)
@@ -51,8 +55,14 @@ public:
 private:
 	Renderer::RenderParams m_params;
 	std::shared_ptr<Texture2D> m_texture;
-	// std::shared_ptr<Renderer> m_renderer;
 
-	bool m_isDragging = false;
-	glm::vec2 m_dragOffset;
+	SpatialPartitioning *m_spatial;
+
+	glm::vec2 m_velocity;
+
+	// Particle interaction variables
+	int m_interactionRange = 1;	  // Range in grid cells
+	float m_maxDistance = 30.0f; // Maximum interaction distance in pixels
+
+	void CheckNearbyObjects();
 };

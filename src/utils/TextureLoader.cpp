@@ -1,5 +1,5 @@
 // TextureLoader.cpp
-#include <src/utils/TextureLoader.hpp>
+#include <include/utils/TextureLoader.hpp>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <include/stb_image.h>

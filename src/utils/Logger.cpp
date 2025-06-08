@@ -1,4 +1,4 @@
-#include <src/utils/Logger.hpp>
+#include <include/utils/Logger.hpp>
 
 namespace fs = std::filesystem;
 
@@ -36,6 +36,7 @@ namespace utils
 
 	void Logger::shutdown()
 	{
+		utils::Logger::info("Сlosing the Log File");
 		if (logFile.is_open())
 		{
 			logFile.close();

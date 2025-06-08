@@ -1,4 +1,4 @@
-#include <src/graphics/GLContext.hpp>
+#include <include/graphics/GLContext.hpp>
 
 void GLContext::Init(GLFWwindow *window)
 {

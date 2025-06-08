@@ -1,5 +1,5 @@
 #include <include/core/Settings.hpp>
-#include <src/utils/Logger.hpp>
+#include <include/utils/Logger.hpp>
 #include <fstream>
 #include <libs/nlohmann/json.hpp>
 

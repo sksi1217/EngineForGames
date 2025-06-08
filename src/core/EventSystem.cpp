@@ -37,7 +37,10 @@ void EventSystem::GLFWKeyCallback(GLFWwindow *window, int key, int scancode, int
 			}
 			catch (const std::exception &e)
 			{
-				std::cerr << "Key callback error: " << e.what() << std::endl;
+
+				std::stringstream ss;
+				ss << e.what();
+				utils::Logger::error("Key callback error: " + ss.str());
 			}
 		}
 	}
@@ -59,7 +62,9 @@ void EventSystem::GLFWMouseButtonCallback(GLFWwindow *window, int button, int ac
 			}
 			catch (const std::exception &e)
 			{
-				std::cerr << "Mouse button callback error: " << e.what() << std::endl;
+				std::stringstream ss;
+				ss << e.what();
+				utils::Logger::error("Mouse button callback error: " + ss.str());
 			}
 		}
 	}
@@ -81,7 +86,9 @@ void EventSystem::GLFWCursorPosCallback(GLFWwindow *window, double x, double y)
 			}
 			catch (const std::exception &e)
 			{
-				std::cerr << "Mouse position callback error: " << e.what() << std::endl;
+				std::stringstream ss;
+				ss << e.what();
+				utils::Logger::error("Mouse position callback error: " + ss.str());
 			}
 		}
 	}
@@ -103,7 +110,9 @@ void EventSystem::GLFWScrollCallback(GLFWwindow *window, double xoffset, double 
 			}
 			catch (const std::exception &e)
 			{
-				std::cerr << "Mouse scroll callback error: " << e.what() << std::endl;
+				std::stringstream ss;
+				ss << e.what();
+				utils::Logger::error("Mouse scroll callback error: " + ss.str());
 			}
 		}
 	}
@@ -125,7 +134,9 @@ void EventSystem::GLFWWindowSizeCallback(GLFWwindow *window, int width, int heig
 			}
 			catch (const std::exception &e)
 			{
-				std::cerr << "Window size callback error: " << e.what() << std::endl;
+				std::stringstream ss;
+				ss << e.what();
+				utils::Logger::error("Window size callback error: " + ss.str());
 			}
 		}
 	}
@@ -147,7 +158,9 @@ void EventSystem::GLFWCharCallback(GLFWwindow *window, unsigned int codepoint)
 			}
 			catch (const std::exception &e)
 			{
-				std::cerr << "Char callback error: " << e.what() << std::endl;
+				std::stringstream ss;
+				ss << e.what();
+				utils::Logger::error("Char callback error: " + ss.str());
 			}
 		}
 	}
@@ -224,6 +237,9 @@ bool EventSystem::RemoveMouseButtonCallback(CallbackID id)
 		}
 		return true;
 	}
+
+	utils::Logger::warning("Failed to Remove Mouse Button Call back with ID: " + std::to_string(id));
+
 	return false;
 }
 
@@ -259,6 +275,7 @@ bool EventSystem::RemoveMousePosCallback(CallbackID id)
 		}
 		return true;
 	}
+	utils::Logger::warning("Failed to Remove Mouse Pos Callback with ID: " + std::to_string(id));
 	return false;
 }
 
@@ -294,6 +311,7 @@ bool EventSystem::RemoveMouseScrollCallback(CallbackID id)
 		}
 		return true;
 	}
+	utils::Logger::warning("Failed to Remove Mouse Scroll Callback with ID: " + std::to_string(id));
 	return false;
 }
 
@@ -329,6 +347,8 @@ bool EventSystem::RemoveWindowSizeCallback(CallbackID id)
 		}
 		return true;
 	}
+
+	utils::Logger::warning("Failed to Remove Window Size Callback with ID: " + std::to_string(id));
 	return false;
 }
 

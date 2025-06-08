@@ -1,4 +1,4 @@
-#include <src/graphics/Shader.hpp>
+#include <include/graphics/Shader.hpp>
 #include <fstream>
 #include <sstream>
 #include <iostream>
@@ -7,6 +7,7 @@ Shader::Shader() : programID(0) {}
 
 Shader::~Shader()
 {
+	utils::Logger::info("Delete Shader!");
 	if (programID != 0)
 	{
 		glDeleteProgram(programID);

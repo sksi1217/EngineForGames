@@ -1,4 +1,5 @@
 #include <include/core/Engine.hpp>
+#include <random>
 
 Engine::Engine()
 {
@@ -50,6 +51,8 @@ void Engine::Initialize()
 	// ! Инициализация ImGui
 	ImGuiContext::Init(m_Window->GetWindow());
 
+	spatialPartitioning = new SpatialPartitioning(2000, 1000);
+
 	// ? Временное решение
 	// ! Загружаем текстуры
 	auto texture = TextureLoader::loadTexture("assets/textures/texture.png");
@@ -61,9 +64,27 @@ void Engine::Initialize()
 		return;
 	}
 
-	auto obj = std::make_shared<GameObject>(texture);
+	// Инициализация генератора случайных чисел
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::uniform_real_distribution<float> distX(0.0f, 1280.0f);
+	std::uniform_real_distribution<float> distY(0.0f, 720.0f);
 
-	gameObj.push_back(obj);
+	for (int i = 0; i < 100; ++i)
+	{
+		auto obj = std::make_shared<GameObject>(texture, spatialPartitioning);
+
+		float x = distX(gen); // случайная X
+		float y = distY(gen); // случайная Y
+
+		obj->SetPosition(glm::vec2(x, y)); // устанавливаем позицию
+		// obj->SetInteractionRange(1);       // Check adjacent cells
+		// obj->SetMaxDistance(150.0f);       // Max interaction distance
+
+		gameObj.push_back(obj);
+		spatialPartitioning->AddObject(obj);
+	}
+
 	// ? ---
 }
 
@@ -92,9 +113,31 @@ void Engine::Run()
 
 void Engine::Update()
 {
-	for (const auto &obj : gameObj)
+
+	// Обновляем объекты по ячейкам
+	for (int y = 0; y < spatialPartitioning->GetGridHeight(); ++y)
 	{
-		obj->Update();
+		for (int x = 0; x < spatialPartitioning->GetGridWidth(); ++x)
+		{
+			const auto &cell = spatialPartitioning->GetCell(x, y);
+			for (const auto &obj : cell)
+			{
+				if (!obj) // Проверяем, что объект существует
+				{
+					continue;
+				}
+
+				glm::vec2 oldPosition = obj->GetPosition();
+
+				obj->Draw();
+				obj->Update();
+
+				if (oldPosition != obj->GetPosition())
+				{
+					spatialPartitioning->UpdateObjectPosition(obj, oldPosition);
+				}
+			}
+		}
 	}
 
 	/*
@@ -113,10 +156,7 @@ void Engine::Update()
 
 void Engine::Draw()
 {
-	for (const auto &obj : gameObj)
-	{
-		obj->Draw();
-	}
+	spatialPartitioning->DrawDebug();
 
 	// ! Начало кадра ImGui
 	ImGuiContext::BeginFrame();

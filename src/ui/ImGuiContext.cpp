@@ -1,4 +1,4 @@
-#include <src/ui/ImGuiContext.hpp>
+#include <include/ui/ImGuiContext.hpp>
 
 void ImGuiContext::Init(GLFWwindow *window)
 {
@@ -15,6 +15,7 @@ void ImGuiContext::Init(GLFWwindow *window)
 
 ImGuiContext::~ImGuiContext()
 {
+	utils::Logger::info("Shutting down ImGui context");
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();
