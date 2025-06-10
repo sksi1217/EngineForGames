@@ -34,7 +34,7 @@ void ImGuiContext::EndFrame()
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
-void ImGuiContext::RenderDebugUI(GameWindow *m_Window, EventSystem &events, bool *showUI, GameObject *gameObject)
+void ImGuiContext::RenderDebugUI(std::unique_ptr<GameWindow> &m_Window, EventSystem &events, bool *showUI)
 {
 	// ! Создаём окно с debug информацией
 	ImGui::Begin("Debug Info", nullptr, ImGuiWindowFlags_NoCollapse);
@@ -117,101 +117,10 @@ void ImGuiContext::RenderDebugUI(GameWindow *m_Window, EventSystem &events, bool
 		*showUI = false;
 	}
 
-	if (gameObject)
-	{
-		RenderObjectUI(gameObject);
-	}
-
 	ImGui::End();
 }
 
-void ImGuiContext::RenderObjectUI(GameObject *gameObject)
-{
-	if (!gameObject)
-		return;
-
-	ImGui::Begin("Object Properties", nullptr, ImGuiWindowFlags_NoCollapse);
-
-	// ! Позиция
-	glm::vec2 pos = gameObject->GetPosition();
-	if (ImGui::DragFloat2("Position", &pos.x, 1.0f))
-	{
-		gameObject->SetPosition(pos);
-	}
-
-	// ! Размер
-	glm::vec2 size = gameObject->GetSize();
-	if (ImGui::DragFloat2("Size", &size.x, 1.0f, 1.0f, 1000.0f))
-	{
-		gameObject->SetSize(size);
-	}
-
-	// ! Смещение текстуры
-	glm::vec2 texOffset = gameObject->GetTextureOffset();
-	if (ImGui::DragFloat2("Texture Offset", &texOffset.x, 1.0f))
-	{
-		gameObject->SetTextureOffset(texOffset);
-	}
-
-	// ! Размер текстуры
-	glm::vec2 texSize = gameObject->GetTextureSize();
-	if (ImGui::DragFloat2("Texture Size", &texSize.x, 1.0f, 0.0f, 2048.0f))
-	{
-		gameObject->SetTextureSize(texSize);
-	}
-
-	// ! Точка вращения (origin)
-	glm::vec2 origin = gameObject->GetOrigin();
-	if (ImGui::DragFloat2("Origin", &origin.x, 0.01f, 0.0f, 1.0f))
-	{
-		gameObject->SetOrigin(origin);
-	}
-
-	// ! Вращение
-	float rotation = gameObject->GetRotation();
-	if (ImGui::DragFloat("Rotation", &rotation, 1.0f, 0.0f, 360.0f))
-	{
-		gameObject->SetRotation(rotation);
-	}
-
-	// ! Цвет
-	glm::vec4 color = gameObject->GetColor();
-	if (ImGui::ColorEdit4("Color", &color.r))
-	{
-		gameObject->SetColor(color);
-	}
-
-	// ! Отражение
-	bool flipX = gameObject->GetFlipX();
-	if (ImGui::Checkbox("Flip X", &flipX))
-	{
-		gameObject->SetFlipX(flipX);
-	}
-
-	bool flipY = gameObject->GetFlipY();
-	if (ImGui::Checkbox("Flip Y", &flipY))
-	{
-		gameObject->SetFlipY(flipY);
-	}
-
-	// ! Кнопка для сброса параметров
-	if (ImGui::Button("Reset to Default"))
-	{
-		gameObject->SetPosition({10.0f, 10.0f});
-		gameObject->SetSize({100.0f, 100.0f});
-		gameObject->SetTextureOffset({0.0f, 0.0f});
-		gameObject->SetTextureSize({0.0f, 0.0f});
-		gameObject->SetOrigin({0.5f, 0.5f});
-		gameObject->SetRotation(0.0f);
-		gameObject->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
-		gameObject->SetFlipX(false);
-		gameObject->SetFlipY(false);
-	}
-
-	ImGui::End();
-}
-
-void ImGuiContext::ShowSettingsWindow(bool *open, GameWindow *m_Window)
+void ImGuiContext::ShowSettingsWindow(bool *open, std::unique_ptr<GameWindow> &m_Window)
 {
 	if (!ImGui::Begin("Settings", open))
 	{

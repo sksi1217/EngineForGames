@@ -34,31 +34,31 @@ Renderer::~Renderer()
 #pragma region Настройка VBO и EBO для базового квадрата
 void Renderer::SetupBuffers()
 {
-	// Вершины квада: позиция и координаты текстуры
+	// ! Вершины квадрата: позиция и координаты текстуры
 	float vertices[] = {
-		// positions        // texture coords
-		0.0f, 1.0f, 0.0f, 0.0f, 1.0f, // нижний левый
-		1.0f, 1.0f, 0.0f, 1.0f, 1.0f, // нижний правый
-		1.0f, 0.0f, 0.0f, 1.0f, 0.0f, // верхний правый
-		0.0f, 0.0f, 0.0f, 0.0f, 0.0f  // верхний левый
+		// ? positions        // ? texture coords
+		0.0f, 1.0f, 0.0f, 0.0f, 1.0f, // ! нижний левый
+		1.0f, 1.0f, 0.0f, 1.0f, 1.0f, // ! нижний правый
+		1.0f, 0.0f, 0.0f, 1.0f, 0.0f, // ! верхний правый
+		0.0f, 0.0f, 0.0f, 0.0f, 0.0f  // ! верхний левый
 	};
 
 	unsigned int indices[] = {
-		0, 1, 3, // первый треугольник
-		1, 2, 3	 // второй треугольник
+		0, 1, 3, // ! первый треугольник
+		1, 2, 3	 // ! второй треугольник
 	};
 
-	// Создаем m_VAO m_VAO m_EBO
+	// ! Создаем m_VAO m_VAO m_EBO
 	glGenVertexArrays(1, &m_VAO);
 	glGenBuffers(1, &m_VBO);
 	glGenBuffers(1, &m_EBO);
 
-	// Активируем VAO
+	// ! Активируем VAO
 	glBindVertexArray(m_VAO);
 
-	// Привязываем VBO как текущий ARRAY_BUFFER
+	// ! Привязываем VBO как текущий ARRAY_BUFFER
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-	// Загружаем данные вершин
+	// ! Загружаем данные вершин
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
 	// Привязываем EBO
@@ -82,12 +82,7 @@ void Renderer::SetupBuffers()
 #pragma region Обновление проекционной матрицы
 void Renderer::UpdateProjection()
 {
-	// ! Используем фиксированное "логическое" разрешение
-	const float logicalWidth = 1280.0f;
-	const float logicalHeight = 720.0f;
-
-	// ! Создаем ортографическую проекцию для логического разрешения
-	m_projection = glm::ortho(0.0f, logicalWidth, logicalHeight, 0.0f, -1.0f, 1.0f);
+	m_projection = glm::ortho(0.0f, LOGICAL_WIDTH, LOGICAL_HEIGHT, 0.0f, -1.0f, 1.0f);
 }
 #pragma endregion
 
@@ -124,6 +119,8 @@ void Renderer::SetViewportSize(int width, int height)
 #pragma region Основной метод отрисовки спрайта
 void Renderer::Render(const Texture2D &texture, const RenderParams &params)
 {
+	m_BatchQueue.emplace_back(&texture, params);
+	/*
 	auto shader = ShaderManager::Get().GetDefaultShader();
 	if (!shader)
 		return;
@@ -188,107 +185,86 @@ void Renderer::Render(const Texture2D &texture, const RenderParams &params)
 
 	// Отвязываем VAO
 	glBindVertexArray(0);
+	*/
 }
 
 #pragma endregion
 
-void Renderer::RenderLine(glm::vec2 pos1, glm::vec2 pos2, glm::vec4 color)
+#pragma region
+void Renderer::BeginBatch()
 {
-	// Создаём временные VAO и VBO
-	GLuint vao, vbo;
+	m_BatchQueue.clear(); // Очищаем предыдущие команды
+}
 
-	glGenVertexArrays(1, &vao);
-	glGenBuffers(1, &vbo);
+void Renderer::EndBatch()
+{
+	if (m_BatchQueue.empty())
+	{
+		return;
+	}
 
-	glBindVertexArray(vao);
-
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	float vertices[] = {
-		pos1.x, pos1.y,
-		pos2.x, pos2.y};
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-	// Указываем атрибуты вершин: позиция (vec2)
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void *)0);
-	glEnableVertexAttribArray(0);
-
-	// Используем шейдер для отрисовки линии
 	auto shader = ShaderManager::Get().GetDefaultShader();
 	if (!shader)
+	{
 		return;
+	}
 
+	// ! Активируем шейдер
 	shader->Use();
 
-	// Применяем преобразования (модель и проекцию)
-	shader->setMat4("model", glm::mat4(1.0f));
 	shader->setMat4("projection", m_projection);
-	shader->setVec4("spriteColor", color); // Цвет линии
 
-	// Рисуем линию
-	glLineWidth(2.0f);
-	glDrawArrays(GL_LINES, 0, 2);
+	glBindVertexArray(m_VAO);
 
-	// Очистка временных ресурсов
-	glDeleteVertexArrays(1, &vao);
-	glDeleteBuffers(1, &vbo);
+	for (const auto &[texture, params] : m_BatchQueue)
+	{
+		// ! Проверяем текстуру
+		if (!texture)
+		{
+			return;
+		}
+
+		// ! Привязываем текстуру
+		texture->Bind();
+
+		// ! Создаем модельную матрицу
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(params.position, 0.0f));
+		model = glm::translate(model, glm::vec3(params.origin * params.size, 0.0f));
+		model = glm::rotate(model, glm::radians(params.rotation), glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::translate(model, glm::vec3(-params.origin * params.size, 0.0f));
+		model = glm::scale(model, glm::vec3(params.size, 1.0f));
+
+		const glm::vec2 texSize = (params.textureSize.x <= 0 || params.textureSize.y <= 0)
+									  ? glm::vec2(texture->width, texture->height)
+									  : params.textureSize;
+
+		// ! Нормализуем координаты текстуры
+		const glm::vec2 texInvDims(1.0f / texture->width, 1.0f / texture->height);
+		glm::vec2 texCoordStart = params.textureOffset * texInvDims;
+		glm::vec2 texCoordEnd = (params.textureOffset + texSize) * texInvDims;
+
+		// ! Отзеркаливаем координаты текстуры
+		if (params.flipX)
+		{
+			std::swap(texCoordStart.x, texCoordEnd.x);
+		}
+		if (params.flipY)
+		{
+			std::swap(texCoordStart.y, texCoordEnd.y);
+		}
+
+		// ! Передаем данные в шейдер
+		shader->setMat4("model", model);
+		shader->setVec4("spriteColor", params.color);
+		shader->setVec2("texCoordStart", texCoordStart);
+		shader->setVec2("texCoordEnd", texCoordEnd);
+
+		// ! Выполняем отрисовку
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	}
+	// ! Отвязываем VAO
+	glBindVertexArray(0);
 }
 
-void Renderer::DrawRectOutline(const glm::vec2 &position, const glm::vec2 &size, const glm::vec4 &color)
-{
-	auto shader = ShaderManager::Get().GetDefaultShader();
-	if (!shader)
-		return;
-
-	// Создаем временный VBO и VAO для линий
-	GLuint lineVAO, lineVBO;
-	glGenVertexArrays(1, &lineVAO);
-	glGenBuffers(1, &lineVBO);
-
-	// Координаты вершин контура прямоугольника (без текстурных координат)
-	float vertices[] = {
-		position.x, position.y, 0.0f,					// левый нижний
-		position.x + size.x, position.y, 0.0f,			// правый нижний
-		position.x + size.x, position.y + size.y, 0.0f, // правый верхний
-		position.x, position.y + size.y, 0.0f			// левый верхний
-	};
-
-	// Индексы для рисования линий (замкнутый контур)
-	unsigned int indices[] = {
-		0, 1, // нижняя линия
-		1, 2, // правая линия
-		2, 3, // верхняя линия
-		3, 0  // левая линия
-	};
-
-	// Настраиваем VAO и VBO
-	glBindVertexArray(lineVAO);
-
-	glBindBuffer(GL_ARRAY_BUFFER, lineVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-	GLuint lineEBO;
-	glGenBuffers(1, &lineEBO);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lineEBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-	// Указываем атрибуты вершин (только позиция)
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
-	glEnableVertexAttribArray(0);
-
-	// Настраиваем шейдер
-	shader->Use();
-	shader->setMat4("model", glm::mat4(1.0f));
-	shader->setMat4("projection", m_projection); // Доступ к проекции через Get()
-	shader->setVec4("spriteColor", color);
-	shader->setVec2("texCoordStart", glm::vec2(0.0f));
-	shader->setVec2("texCoordEnd", glm::vec2(1.0f));
-
-	// Рисуем линии
-	glLineWidth(1.0f); // Толщина линии
-	glDrawElements(GL_LINES, 8, GL_UNSIGNED_INT, 0);
-
-	// Очищаем ресурсы
-	glDeleteVertexArrays(1, &lineVAO);
-	glDeleteBuffers(1, &lineVBO);
-	glDeleteBuffers(1, &lineEBO);
-}
+#pragma endregion

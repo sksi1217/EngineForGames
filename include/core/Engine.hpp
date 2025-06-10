@@ -23,6 +23,8 @@
 
 #include <include/ui/ImGuiContext.hpp>
 
+#include <include/utils/Systems.hpp>
+
 class Engine
 {
 public:
@@ -31,13 +33,18 @@ public:
 
 	void Run();
 
-	std::vector<std::shared_ptr<GameObject>> gameObj;
+	// std::vector<std::shared_ptr<entt::entity>> gameObj;
+	std::vector<entt::entity> gameEntities;
 
 private:
-	GameWindow *m_Window;
+	std::unique_ptr<GameWindow> m_Window;
 	GLContext glContext;
 	EngineState m_State;
 	EventSystem events;
+
+	// Системы
+	RenderSystem renderSystem;
+	MovementSystem movementSystem;
 
 	SpatialPartitioning *spatialPartitioning;
 

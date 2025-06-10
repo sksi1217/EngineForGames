@@ -62,6 +62,15 @@
 		"ranges": "cpp",
 		"span": "cpp",
 		"valarray": "cpp",
-		"typeindex": "cpp"
+		"typeindex": "cpp",
+		"chrono": "cpp",
+		"condition_variable": "cpp",
+		"list": "cpp",
+		"set": "cpp",
+		"unordered_set": "cpp",
+		"semaphore": "cpp",
+		"shared_mutex": "cpp",
+		"stop_token": "cpp",
+		"thread": "cpp"
 	}
 }

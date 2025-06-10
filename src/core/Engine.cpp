@@ -1,5 +1,6 @@
 #include <include/core/Engine.hpp>
 #include <random>
+#include <thread>
 
 Engine::Engine()
 {
@@ -10,12 +11,6 @@ Engine::~Engine()
 {
 	utils::Logger::info("Shutting down engine...");
 	utils::Logger::shutdown();
-
-	if (m_Window)
-	{
-		delete m_Window;
-		m_Window = nullptr;
-	}
 
 	glfwTerminate();
 }
@@ -31,7 +26,7 @@ void Engine::Initialize()
 
 	// ! Инициализация окна
 	auto &settings = Settings::Get();
-	m_Window = new GameWindow("My Game Engine", settings.graphics.resolution.x, settings.graphics.resolution.y);
+	m_Window = std::make_unique<GameWindow>("My Game Engine", settings.graphics.resolution.x, settings.graphics.resolution.y);
 	m_Window->ApplySettings(settings);
 
 	// ! Инициализация GLEW
@@ -70,19 +65,45 @@ void Engine::Initialize()
 	std::uniform_real_distribution<float> distX(0.0f, 1280.0f);
 	std::uniform_real_distribution<float> distY(0.0f, 720.0f);
 
+	auto &registry = ECS::Get().GetRegistry();
+
+	/*
+	for (int i = 0; i < 10000; ++i)
+	{
+		// Создание новой сущности
+		entt::entity entity = registry.create();
+
+		// Генерация случайной позиции
+		float x = distX(gen);
+		float y = distY(gen);
+
+		// Добавление компонентов
+		auto &transform = registry.emplace<TransformComponent>(entity);
+		transform.position = {x, y};
+
+		registry.emplace<SpriteComponent>(entity, texture.get());
+
+		spatialPartitioning->AddObject(entity);
+	}
+	*/
+
 	for (int i = 0; i < 100; ++i)
 	{
-		auto obj = std::make_shared<GameObject>(texture, spatialPartitioning);
+		// Создаем пустой объект
+		GameObject entity = GameObject::Create(registry);
 
-		float x = distX(gen); // случайная X
-		float y = distY(gen); // случайная Y
+		// Генерация случайной позиции
+		float x = distX(gen);
+		float y = distY(gen);
 
-		obj->SetPosition(glm::vec2(x, y)); // устанавливаем позицию
-		// obj->SetInteractionRange(1);       // Check adjacent cells
-		// obj->SetMaxDistance(150.0f);       // Max interaction distance
+		// Добавление компонентов
+		auto &transform = entity.GetComponent<TransformComponent>();
+		transform.position = {x, y};
 
-		gameObj.push_back(obj);
-		spatialPartitioning->AddObject(obj);
+		// Добавляем к нему SpriteComponent
+		entity.AddComponent<SpriteComponent>(texture.get());
+
+		spatialPartitioning->AddObject(entity.entity);
 	}
 
 	// ? ---
@@ -108,37 +129,49 @@ void Engine::Run()
 
 			m_Window->SwapBuffers();
 		}
+		else
+		{
+			// Снижаем нагрузку, когда окно не в фокусе
+			std::this_thread::sleep_for(std::chrono::milliseconds(100));
+		}
 	}
 }
 
 void Engine::Update()
 {
 
-	// Обновляем объекты по ячейкам
-	for (int y = 0; y < spatialPartitioning->GetGridHeight(); ++y)
+	movementSystem.Update(*spatialPartitioning);
+
+	// Обновление через ECS вместо gameObj
+	/*
+	auto &registry = ECS::Get().GetRegistry();
+
+	auto view = registry.view<TransformComponent>();
+	for (auto entity : view)
 	{
-		for (int x = 0; x < spatialPartitioning->GetGridWidth(); ++x)
+		auto &transform = view.get<TransformComponent>(entity);
+		glm::vec2 oldPos = transform.position;
+
+		// Обновляем позицию
+		// transform.position.x += 10.0f * utils::Time::DeltaTime();
+
+		// Обновляем SpatialPartitioning если позиция изменилась
+		if (transform.position != oldPos)
 		{
-			const auto &cell = spatialPartitioning->GetCell(x, y);
-			for (const auto &obj : cell)
-			{
-				if (!obj) // Проверяем, что объект существует
-				{
-					continue;
-				}
-
-				glm::vec2 oldPosition = obj->GetPosition();
-
-				obj->Draw();
-				obj->Update();
-
-				if (oldPosition != obj->GetPosition())
-				{
-					spatialPartitioning->UpdateObjectPosition(obj, oldPosition);
-				}
-			}
+			spatialPartitioning->UpdateObjectPosition(entity, oldPos);
 		}
 	}
+
+	*/
+	/*
+	for (const auto &obj : gameEntities)
+	{
+		if (obj)
+		{
+			obj->Update();
+		}
+	}
+	*/
 
 	/*
 	// ! Пример использования состояния
@@ -151,18 +184,54 @@ void Engine::Update()
 	{
 		std::cout << "нажата ЛКМ" << std::endl;
 	}
-		*/
+	*/
 }
 
 void Engine::Draw()
 {
-	spatialPartitioning->DrawDebug();
+	if (!spatialPartitioning)
+		return;
+
+	// spatialPartitioning->DrawDebug();
+
+	Renderer::Get().BeginBatch();
+
+	// Обновление всех систем
+	renderSystem.Update();
+
+	Renderer::Get().EndBatch();
+
+	/*
+	// ! Обновляем объекты по ячейкам
+	for (int y = 0; y < spatialPartitioning->GetGridHeight(); ++y)
+	{
+		for (int x = 0; x < spatialPartitioning->GetGridWidth(); ++x)
+		{
+			const auto &cell = spatialPartitioning->GetCell(x, y);
+
+			for (const auto &obj : cell)
+			{
+				if (obj)
+				{
+					const glm::vec2 oldPosition = obj->GetPosition();
+
+					obj->Draw();
+
+					if (oldPosition != obj->GetPosition())
+					{
+						spatialPartitioning->UpdateObjectPosition(obj, oldPosition);
+					}
+				}
+			}
+		}
+	}
+	*/
 
 	// ! Начало кадра ImGui
 	ImGuiContext::BeginFrame();
 	if (m_State.showDebugUI)
 	{
-		ImGuiContext::RenderDebugUI(m_Window, events, &m_State.showDebugUI, gameObj.empty() ? nullptr : gameObj[0].get());
+		ImGuiContext::RenderDebugUI(m_Window, events, &m_State.showDebugUI);
 	}
 
 	if (m_State.showSettingsWindow)

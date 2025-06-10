@@ -24,6 +24,7 @@ SRCS = sandbox/main.cpp \
 	src/core/Settings.cpp \
 	src/core/EventSystem.cpp \
 	src/core/SpatialPartition.cpp \
+	src/utils/Systems.cpp \
 
 # Компилятор
 CXX = g++

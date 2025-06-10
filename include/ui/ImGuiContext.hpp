@@ -8,7 +8,7 @@
 
 #include <include/utils/Time.hpp>
 
-#include <core/GameObject.hpp>
+// #include <core/GameObject.hpp>
 
 #include <include/core/EventSystem.hpp>
 #include <include/core/GameWindow.hpp>
@@ -23,11 +23,9 @@ public:
 	static void BeginFrame();
 	static void EndFrame();
 
-	static void RenderDebugUI(GameWindow *window, EventSystem &events, bool *showUI, GameObject *gameObject = nullptr);
+	static void RenderDebugUI(std::unique_ptr<GameWindow> &window, EventSystem &events, bool *showUI);
 
-	static void RenderObjectUI(GameObject *gameObject);
-
-	static void ShowSettingsWindow(bool *open, GameWindow *m_Window);
+	static void ShowSettingsWindow(bool *open, std::unique_ptr<GameWindow> &m_Window);
 
 private:
 	static inline char m_InputText[256];
