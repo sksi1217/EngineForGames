@@ -33,20 +33,19 @@ public:
 
 	void Run();
 
-	// std::vector<std::shared_ptr<entt::entity>> gameObj;
-	std::vector<entt::entity> gameEntities;
-
 private:
 	std::unique_ptr<GameWindow> m_Window;
 	GLContext glContext;
 	EngineState m_State;
 	EventSystem events;
 
+	SpatialPartitioning *spatialPartitioning;
+
 	// Системы
 	RenderSystem renderSystem;
 	MovementSystem movementSystem;
-
-	SpatialPartitioning *spatialPartitioning;
+	CollisionSystem collisionSystem;
+	ScriptSystem scriptSystem;
 
 	void Initialize();
 	void Update();

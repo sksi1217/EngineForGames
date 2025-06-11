@@ -1,9 +1,12 @@
 #pragma once
 #include <core/ECS.hpp>
 #include <include/graphics/Renderer.hpp>
-#include <include/core/components/TransformComponent.hpp>
-#include <include/core/components/SpriteComponent.hpp>
+
+#include <include/utils/Time.hpp>
+
 #include <include/core/SpatialPartitioning.hpp>
+
+#include <include/components/Components.hpp>
 
 class RenderSystem
 {
@@ -15,4 +18,17 @@ class MovementSystem
 {
 public:
 	void Update(SpatialPartitioning &spatialPartitioning);
+};
+
+class CollisionSystem
+{
+public:
+	void Update(SpatialPartitioning &spatialPartitioning);
+};
+
+class ScriptSystem
+{
+public:
+	void Update();
+	void FixedUpdate();
 };

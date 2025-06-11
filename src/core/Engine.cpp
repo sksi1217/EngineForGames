@@ -1,6 +1,8 @@
 #include <include/core/Engine.hpp>
 #include <random>
 #include <thread>
+#include <sandbox/ExampleScript.hpp>
+#include <sandbox/Script.hpp>
 
 Engine::Engine()
 {
@@ -62,34 +64,13 @@ void Engine::Initialize()
 	// Инициализация генератора случайных чисел
 	std::random_device rd;
 	std::mt19937 gen(rd());
-	std::uniform_real_distribution<float> distX(0.0f, 1280.0f);
-	std::uniform_real_distribution<float> distY(0.0f, 720.0f);
+	std::uniform_real_distribution<float> distX(0.0f, 800.0f);
+	std::uniform_real_distribution<float> distY(0.0f, 600.0f);
 
 	auto &registry = ECS::Get().GetRegistry();
 
-	/*
-	for (int i = 0; i < 10000; ++i)
+	for (int i = 0; i < 10; ++i)
 	{
-		// Создание новой сущности
-		entt::entity entity = registry.create();
-
-		// Генерация случайной позиции
-		float x = distX(gen);
-		float y = distY(gen);
-
-		// Добавление компонентов
-		auto &transform = registry.emplace<TransformComponent>(entity);
-		transform.position = {x, y};
-
-		registry.emplace<SpriteComponent>(entity, texture.get());
-
-		spatialPartitioning->AddObject(entity);
-	}
-	*/
-
-	for (int i = 0; i < 100; ++i)
-	{
-		// Создаем пустой объект
 		GameObject entity = GameObject::Create(registry);
 
 		// Генерация случайной позиции
@@ -100,13 +81,13 @@ void Engine::Initialize()
 		auto &transform = entity.GetComponent<TransformComponent>();
 		transform.position = {x, y};
 
-		// Добавляем к нему SpriteComponent
 		entity.AddComponent<SpriteComponent>(texture.get());
-
+		entity.AddScript<ExampleScript>();
+		entity.AddScript<Script>();
 		spatialPartitioning->AddObject(entity.entity);
-	}
 
-	// ? ---
+		printf("Created object %d with entity id: %u\n", i, static_cast<uint32_t>(entity.entity));
+	}
 }
 
 void Engine::Run()
@@ -139,52 +120,10 @@ void Engine::Run()
 
 void Engine::Update()
 {
-
 	movementSystem.Update(*spatialPartitioning);
-
-	// Обновление через ECS вместо gameObj
-	/*
-	auto &registry = ECS::Get().GetRegistry();
-
-	auto view = registry.view<TransformComponent>();
-	for (auto entity : view)
-	{
-		auto &transform = view.get<TransformComponent>(entity);
-		glm::vec2 oldPos = transform.position;
-
-		// Обновляем позицию
-		// transform.position.x += 10.0f * utils::Time::DeltaTime();
-
-		// Обновляем SpatialPartitioning если позиция изменилась
-		if (transform.position != oldPos)
-		{
-			spatialPartitioning->UpdateObjectPosition(entity, oldPos);
-		}
-	}
-
-	*/
-	/*
-	for (const auto &obj : gameEntities)
-	{
-		if (obj)
-		{
-			obj->Update();
-		}
-	}
-	*/
-
-	/*
-	// ! Пример использования состояния
-	if (m_State.keys[GLFW_KEY_W])
-	{
-		std::cout << "нажата W" << std::endl;
-	}
-
-	if (m_State.mouseButtons[GLFW_MOUSE_BUTTON_LEFT])
-	{
-		std::cout << "нажата ЛКМ" << std::endl;
-	}
-	*/
+	// collisionSystem.Update(*spatialPartitioning);
+	scriptSystem.Update();
+	scriptSystem.FixedUpdate();
 }
 
 void Engine::Draw()
@@ -192,43 +131,28 @@ void Engine::Draw()
 	if (!spatialPartitioning)
 		return;
 
-	// spatialPartitioning->DrawDebug();
-
 	Renderer::Get().BeginBatch();
 
-	// Обновление всех систем
+	// ! Выводим в консоль сколько объектов в spatialPartitioning
+	// spatialPartitioning->DrawDebug();
+	// ! Рисуем всю сетку
+	// Renderer::Get().DrawDebugGrid(*spatialPartitioning, glm::vec4(1.0f, 0.0f, 0.0f, 0.5f));
+
+	// ! Обновление всех систем
 	renderSystem.Update();
 
 	Renderer::Get().EndBatch();
 
-	/*
-	// ! Обновляем объекты по ячейкам
-	for (int y = 0; y < spatialPartitioning->GetGridHeight(); ++y)
-	{
-		for (int x = 0; x < spatialPartitioning->GetGridWidth(); ++x)
-		{
-			const auto &cell = spatialPartitioning->GetCell(x, y);
-
-			for (const auto &obj : cell)
-			{
-				if (obj)
-				{
-					const glm::vec2 oldPosition = obj->GetPosition();
-
-					obj->Draw();
-
-					if (oldPosition != obj->GetPosition())
-					{
-						spatialPartitioning->UpdateObjectPosition(obj, oldPosition);
-					}
-				}
-			}
-		}
-	}
-	*/
+	// ** ------------
 
 	// ! Начало кадра ImGui
 	ImGuiContext::BeginFrame();
+
+	if (m_State.showDebugUI)
+	{
+		// ImGuiContext::RenderObjectUI(m_Objects.empty() ? nullptr : m_Objects[0].get());
+	}
+
 	if (m_State.showDebugUI)
 	{
 		ImGuiContext::RenderDebugUI(m_Window, events, &m_State.showDebugUI);

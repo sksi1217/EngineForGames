@@ -5,6 +5,8 @@
 #include <include/graphics/Texture2D.hpp>
 #include <include/graphics/Shader.hpp>
 
+class SpatialPartitioning;
+
 class Renderer
 {
 public:
@@ -18,19 +20,23 @@ public:
 		glm::vec2 position{10.0f, 10.0f}; //
 		glm::vec2 size{50.0f, 50.0f};	  //
 
-		glm::vec2 textureOffset{0.0f, 0.0f}; //
-		glm::vec2 textureSize{0.0f, 0.0f};//
-		glm::vec2 origin{0.5f, 0.5f};//
-		float rotation = 0.0f;//
+		glm::vec2 textureOffset{0.0f, 0.0f};	 //
+		glm::vec2 textureSize{0.0f, 0.0f};		 //
+		glm::vec2 origin{0, 0};					 //
+		float rotation = 0.0f;					 //
 		glm::vec4 color{1.0f, 1.0f, 1.0f, 1.0f}; //
-		bool flipX = false;//
-		bool flipY = false;//
+		bool flipX = false;						 //
+		bool flipY = false;						 //
 	};
 
 	Renderer();
 	~Renderer();
 
 	void Render(const Texture2D &texture, const RenderParams &params);
+
+	void DrawDebugGrid(const SpatialPartitioning &grid, const glm::vec4 &color);
+	void DrawRectOutline(const glm::vec2 &position, const glm::vec2 &size, const glm::vec4 &color);
+
 	void SetViewportSize(int width, int height);
 
 	void BeginBatch();

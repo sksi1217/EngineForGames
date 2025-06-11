@@ -1,4 +1,4 @@
-#include "include/graphics/Renderer.hpp"
+#include <include/graphics/Renderer.hpp>
 #include <GL/glew.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <vector>
@@ -36,11 +36,11 @@ void Renderer::SetupBuffers()
 {
 	// ! Вершины квадрата: позиция и координаты текстуры
 	float vertices[] = {
-		// ? positions        // ? texture coords
-		0.0f, 1.0f, 0.0f, 0.0f, 1.0f, // ! нижний левый
-		1.0f, 1.0f, 0.0f, 1.0f, 1.0f, // ! нижний правый
-		1.0f, 0.0f, 0.0f, 1.0f, 0.0f, // ! верхний правый
-		0.0f, 0.0f, 0.0f, 0.0f, 0.0f  // ! верхний левый
+		// positions          // texture coords
+		-0.5f, 0.5f, 0.0f, 0.0f, 1.0f, // верхний левый
+		0.5f, 0.5f, 0.0f, 1.0f, 1.0f,  // верхний правый
+		0.5f, -0.5f, 0.0f, 1.0f, 0.0f, // нижний правый
+		-0.5f, -0.5f, 0.0f, 0.0f, 0.0f // нижний левый
 	};
 
 	unsigned int indices[] = {
@@ -229,10 +229,9 @@ void Renderer::EndBatch()
 
 		// ! Создаем модельную матрицу
 		glm::mat4 model = glm::mat4(1.0f);
+
 		model = glm::translate(model, glm::vec3(params.position, 0.0f));
-		model = glm::translate(model, glm::vec3(params.origin * params.size, 0.0f));
 		model = glm::rotate(model, glm::radians(params.rotation), glm::vec3(0.0f, 0.0f, 1.0f));
-		model = glm::translate(model, glm::vec3(-params.origin * params.size, 0.0f));
 		model = glm::scale(model, glm::vec3(params.size, 1.0f));
 
 		const glm::vec2 texSize = (params.textureSize.x <= 0 || params.textureSize.y <= 0)
@@ -257,6 +256,7 @@ void Renderer::EndBatch()
 		// ! Передаем данные в шейдер
 		shader->setMat4("model", model);
 		shader->setVec4("spriteColor", params.color);
+		shader->setVec2("origin", params.origin);
 		shader->setVec2("texCoordStart", texCoordStart);
 		shader->setVec2("texCoordEnd", texCoordEnd);
 
@@ -267,4 +267,86 @@ void Renderer::EndBatch()
 	glBindVertexArray(0);
 }
 
+#pragma endregion
+
+#pragma region Рисования
+void Renderer::DrawDebugGrid(const SpatialPartitioning &grid, const glm::vec4 &color)
+{
+	int cellSize = grid.GetCellSize();
+	int gridWidth = grid.GetGridWidth();
+	int gridHeight = grid.GetGridHeight();
+
+	for (int x = 0; x < gridWidth; ++x)
+	{
+		for (int y = 0; y < gridHeight; ++y)
+		{
+			// Позиция ячейки
+			glm::vec2 position(x * cellSize, y * cellSize);
+			glm::vec2 size(cellSize, cellSize);
+
+			// Вызываем уже написанный метод для одной ячейки
+			DrawRectOutline(position, size, color);
+		}
+	}
+}
+
+void Renderer::DrawRectOutline(const glm::vec2 &position, const glm::vec2 &size, const glm::vec4 &color)
+{
+	auto shader = ShaderManager::Get().GetDefaultShader();
+	if (!shader)
+		return;
+
+	// Создаем временный VBO и VAO для линий
+	GLuint lineVAO, lineVBO;
+	glGenVertexArrays(1, &lineVAO);
+	glGenBuffers(1, &lineVBO);
+
+	// Координаты вершин контура прямоугольника (без текстурных координат)
+	float vertices[] = {
+		position.x, position.y, 0.0f,					// левый нижний
+		position.x + size.x, position.y, 0.0f,			// правый нижний
+		position.x + size.x, position.y + size.y, 0.0f, // правый верхний
+		position.x, position.y + size.y, 0.0f			// левый верхний
+	};
+
+	// Индексы для рисования линий (замкнутый контур)
+	unsigned int indices[] = {
+		0, 1, // нижняя линия
+		1, 2, // правая линия
+		2, 3, // верхняя линия
+		3, 0  // левая линия
+	};
+
+	// Настраиваем VAO и VBO
+	glBindVertexArray(lineVAO);
+
+	glBindBuffer(GL_ARRAY_BUFFER, lineVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+	GLuint lineEBO;
+	glGenBuffers(1, &lineEBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lineEBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+	// Указываем атрибуты вершин (только позиция)
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+	glEnableVertexAttribArray(0);
+
+	// Настраиваем шейдер
+	shader->Use();
+	shader->setMat4("model", glm::mat4(1.0f));
+	shader->setMat4("projection", m_projection); // Доступ к проекции через Get()
+	shader->setVec4("spriteColor", color);
+	shader->setVec2("texCoordStart", glm::vec2(0.0f));
+	shader->setVec2("texCoordEnd", glm::vec2(1.0f));
+
+	// Рисуем линии
+	glLineWidth(1.0f); // Толщина линии
+	glDrawElements(GL_LINES, 8, GL_UNSIGNED_INT, 0);
+
+	// Очищаем ресурсы
+	glDeleteVertexArrays(1, &lineVAO);
+	glDeleteBuffers(1, &lineVBO);
+	glDeleteBuffers(1, &lineEBO);
+}
 #pragma endregion

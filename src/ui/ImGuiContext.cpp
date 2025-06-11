@@ -103,10 +103,26 @@ void ImGuiContext::RenderDebugUI(std::unique_ptr<GameWindow> &m_Window, EventSys
 
 	// ! Ввод текста
 	ImGui::Text("Char Input:");
-	ImGui::Text("  Char: %u ('%c') (%.2f sec ago)",
-				events.m_LastCharInput.character,
-				isprint(events.m_LastCharInput.character) ? events.m_LastCharInput.character : ' ',
-				static_cast<float>(glfwGetTime()) - events.m_LastCharInput.time);
+	if (events.m_LastCharInput.time > 0.0f) // если событие уже было
+	{
+		unsigned int codepoint = events.m_LastCharInput.character;
+		if (codepoint > 0 && codepoint <= 0x7F)
+		{
+			char c = static_cast<char>(codepoint);
+			ImGui::Text("  Char: %u ('%c') (%.2f sec ago)",
+						codepoint,
+						isprint(static_cast<unsigned char>(c)) ? c : '.',
+						static_cast<float>(glfwGetTime()) - events.m_LastCharInput.time);
+		}
+		else
+		{
+			ImGui::Text("  Char: %u (non-ASCII or invalid)", codepoint);
+		}
+	}
+	else
+	{
+		ImGui::Text("  Char: (no input yet)");
+	}
 
 	// ! Разделитель
 	ImGui::Separator();
@@ -296,6 +312,23 @@ void ImGuiContext::ShowSettingsWindow(bool *open, std::unique_ptr<GameWindow> &m
 	{
 		settings.Load(); // Вернуть предыдущие настройки
 		*open = false;
+	}
+
+	ImGui::End();
+}
+
+void ImGuiContext::RenderObjectUI(TransformComponent &transform)
+{
+	ImGui::Begin("Object Properties", nullptr, ImGuiWindowFlags_NoCollapse);
+
+	if (ImGui::DragFloat2("Position", &transform.position.x, 1.0f))
+	{
+		// Изменения уже внесены благодаря ссылке
+	}
+
+	if (ImGui::DragFloat2("Origin", &transform.origin.x, 0.01f, 0.0f, 0.5f))
+	{
+		// То же самое
 	}
 
 	ImGui::End();

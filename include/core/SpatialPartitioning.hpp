@@ -2,7 +2,9 @@
 #include <include/core/GameObject.hpp>
 #include <include/graphics/Renderer.hpp>
 #include <libs/entt/entity/fwd.hpp>
-#include <core/components/TransformComponent.hpp>
+
+#include <include/components/Components.hpp>
+
 #include <include/core/ECS.hpp>
 #include <vector>
 #include <unordered_map>
@@ -30,6 +32,9 @@ public:
 
 	void UpdateObjectPosition(entt::entity entity, const glm::vec2 &oldPosition);
 
+	// ? Возвращает список объектов, находящихся в ячейке по координатам позиции или в соседних ячейках
+	std::vector<entt::entity> GetNearbyObjects(const glm::vec2 &position) const;
+
 private:
 	struct GridPositionComponent
 	{
@@ -43,9 +48,6 @@ private:
 	// ! Сетка: каждая ячейка содержит список объектов
 	std::vector<std::vector<std::vector<entt::entity>>> m_Grid;
 
-	// ? m_Grid[cell.x][cell.y].push_back(object);
-	// ? m_grid[cell.x][cell.y].erase(object); // удалить объект
-
 	// ! Структура для хранения позиции в сетке
 	struct GridPos
 	{
@@ -54,6 +56,7 @@ private:
 
 	int GetObjectCountInCell(int x, int y) const;
 
-	// Вспомогательные методы
+	// ! Вспомогательные методы
+
 	GridPos PositionToGridPos(const glm::vec2 &position) const;
 };

@@ -96,6 +96,29 @@ void SpatialPartitioning::UpdateObjectPosition(entt::entity entity, const glm::v
 	}
 }
 
+std::vector<entt::entity> SpatialPartitioning::GetNearbyObjects(const glm::vec2 &position) const
+{
+	GridPos pos = PositionToGridPos(position);
+	std::vector<entt::entity> result;
+
+	// Проверяем текущую ячейку и все соседние (3x3)
+	for (int dx = -1; dx <= 1; ++dx)
+	{
+		for (int dy = -1; dy <= 1; ++dy)
+		{
+			int x = pos.x + dx;
+			int y = pos.y + dy;
+
+			if (x >= 0 && y >= 0 && x < m_GridWidth && y < m_GridHeight)
+			{
+				result.insert(result.end(), m_Grid[x][y].begin(), m_Grid[x][y].end());
+			}
+		}
+	}
+
+	return result;
+}
+
 void SpatialPartitioning::DrawDebug()
 {
 	system("clear");

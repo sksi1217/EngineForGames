@@ -16,7 +16,6 @@ SRCS = sandbox/main.cpp \
 	libs/imgui/imgui_widgets.cpp \
 	libs/imgui/backends/imgui_impl_opengl3.cpp \
 	libs/imgui/backends/imgui_impl_glfw.cpp \
-	src/core/GameObject.cpp \
 	src/graphics/Renderer.cpp \
 	src/utils/TextureLoader.cpp \
 	src/graphics/Shader.cpp \

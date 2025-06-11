@@ -29,7 +29,7 @@
         "brightness": 0.7580000162124634,
         "contrast": 1.531000018119812,
         "debug_wireframe": true,
-        "fps_limit": 170,
+        "fps_limit": 240,
         "fullscreen": false,
         "gamma": 1.6369999647140503,
         "monitor_index": 0,
