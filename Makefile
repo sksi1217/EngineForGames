@@ -1,66 +1,81 @@
-# Определение имени исполняемого файла
+# Цвета для вывода в консоль
+GREEN  := $(shell tput -Txterm setaf 2)
+YELLOW := $(shell tput -Txterm setaf 3)
+RESET  := $(shell tput -Txterm sgr0)
+
+# Режим сборки: debug или release
+BUILD_TYPE ?= debug
+
+ifeq ($(BUILD_TYPE), debug)
+	CXXFLAGS += -g
+else ifeq ($(BUILD_TYPE), release)
+	CXXFLAGS += -O3 -DNDEBUG
+else
+	$(error Invalid BUILD_TYPE=$(BUILD_TYPE). Use 'debug' or 'release')
+endif
+
+# Имя исполняемого файла
 TARGET = build/myapp
 
-# Исходные файлы вашего проекта
-SRCS = sandbox/main.cpp \
-	src/core/Engine.cpp \
-	src/core/GameWindow.cpp \
-	src/utils/Logger.cpp \
-	src/utils/Time.cpp \
-	src/graphics/GLContext.cpp \
-	src/ui/ImGuiContext.cpp \
-	libs/imgui/imgui.cpp \
-	libs/imgui/imgui_demo.cpp \
-	libs/imgui/imgui_draw.cpp \
-	libs/imgui/imgui_tables.cpp \
-	libs/imgui/imgui_widgets.cpp \
-	libs/imgui/backends/imgui_impl_opengl3.cpp \
-	libs/imgui/backends/imgui_impl_glfw.cpp \
-	src/graphics/Renderer.cpp \
-	src/utils/TextureLoader.cpp \
-	src/graphics/Shader.cpp \
-	src/utils/ShaderManager.cpp \
-	src/core/Settings.cpp \
-	src/core/EventSystem.cpp \
-	src/core/SpatialPartition.cpp \
-	src/utils/Systems.cpp \
+# Исходники
+SRCS = tests/main.cpp \
+	engine/core/Engine.cpp \
+	engine/core/SpatialPartitioning.cpp \
+	engine/core/events/EventSystem.cpp \
+	engine/core/window/GameWindow.cpp \
+	engine/core/utils/Logger.cpp \
+	engine/core/Systems.cpp \
+	engine/core/utils/Time.cpp \
+	engine/core/ui/Settings.cpp \
+	engine/core/graphics/renderer/GLContext.cpp \
+	engine/core/graphics/renderer/Renderer.cpp \
+	engine/core/graphics/shaders/Shader.cpp \
+	engine/core/graphics/shaders/ShaderManager.cpp \
+	engine/core/graphics/textures/TextureLoader.cpp \
+	engine/core/ui/ImGuiContext.cpp \
+	extern/imgui/imgui.cpp \
+	extern/imgui/imgui_draw.cpp \
+	extern/imgui/imgui_tables.cpp \
+	extern/imgui/imgui_widgets.cpp \
+	extern/imgui/backends/imgui_impl_glfw.cpp \
+	extern/imgui/backends/imgui_impl_opengl3.cpp \
+
+# Объектные файлы
+OBJS_DIR = build/objs
+OBJS = $(patsubst %.cpp,$(OBJS_DIR)/%.o,$(SRCS))
 
 # Компилятор
 CXX = g++
 
 # Флаги компиляции
-CXXFLAGS = -Wall -std=c++17 -I. -Iinclude -Iimgui -g
+INCLUDES = -I. -Iinclude -Iimgui
+COMMON_CXXFLAGS = -Wall -std=c++17 $(INCLUDES)
+CXXFLAGS += $(COMMON_CXXFLAGS)
 
-# Проверка операционной системы
+# Линковка
 UNAME := $(shell uname)
-
 ifeq ($(UNAME), Linux)
-	# Для Linux: добавляем библиотеки OpenGL, GLFW и GLEW
 	LDFLAGS += -lGL -lglfw -lGLEW
 else
 	$(error Unsupported platform)
 endif
 
-# Объектные файлы будут помещены в одну папку
-OBJS_DIR = build/objs
-OBJS = $(patsubst %.cpp,$(OBJS_DIR)/%.o,$(SRCS))
-
-# Цель по умолчанию
+# Правила сборки
 all: $(TARGET)
 
-# Создание каталога build, если он не существует
 $(TARGET): $(OBJS)
+	@echo "$(GREEN)🔗 Linking $@...$(RESET)"
 	@mkdir -p build
-	$(CXX) $(OBJS) -o $(TARGET) $(LDFLAGS)
+	$(CXX) $^ -o $@ $(LDFLAGS)
 
-# Правило для компиляции .cpp файлов в .o файлы
-$(OBJS): $(OBJS_DIR)/%.o: %.cpp
+$(OBJS_DIR)/%.o: %.cpp
+	@echo "$(YELLOW)⚙️ Compiling $<...$(RESET)"
 	@mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-# Правило для очистки временных файлов
 clean:
-	rm -rf build
+	@echo "$(YELLOW)🗑 Cleaning up...$(RESET)"
+	rm -rf build/*
 
 .PHONY: all clean
 

@@ -1,2 +1,0 @@
-`float dt = utils::Time::DeltaTime();
-` - чтобы узнать значения deltatime

@@ -4,6 +4,7 @@ layout(location=1)in vec2 aTexCoord;
 layout(location=2)in vec4 aColor;
 
 uniform mat4 model;
+uniform mat4 view;
 uniform mat4 projection;
 uniform vec2 texCoordStart;
 uniform vec2 texCoordEnd;
@@ -18,7 +19,7 @@ void main()
     vec3 adjustedPos=aPos+vec3(origin,0.);
     
     // ! Применяем трансформации модели и проекции
-    gl_Position=projection*model*vec4(adjustedPos,1.);
+    gl_Position=projection*view*model*vec4(adjustedPos,1.);
     
     // ! Передаем текстурные координаты
     TexCoord=texCoordStart+aTexCoord*(texCoordEnd-texCoordStart);
