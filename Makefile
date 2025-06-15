@@ -27,7 +27,6 @@ SRCS = tests/main.cpp \
 	engine/core/Systems.cpp \
 	engine/core/utils/Time.cpp \
 	engine/core/ui/Settings.cpp \
-	engine/core/graphics/renderer/GLContext.cpp \
 	engine/core/graphics/renderer/Renderer.cpp \
 	engine/core/graphics/shaders/Shader.cpp \
 	engine/core/graphics/shaders/ShaderManager.cpp \
@@ -39,6 +38,7 @@ SRCS = tests/main.cpp \
 	extern/imgui/imgui_widgets.cpp \
 	extern/imgui/backends/imgui_impl_glfw.cpp \
 	extern/imgui/backends/imgui_impl_opengl3.cpp \
+
 
 # Объектные файлы
 OBJS_DIR = build/objs

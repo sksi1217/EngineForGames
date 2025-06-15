@@ -1,8 +1,8 @@
 #pragma once
-#include <glm/glm.hpp>
 #include <functional>
+#include <engine/engineapi.hpp>
 
-class TrackedVec2
+class Position2D
 {
 private:
 	glm::vec2 value;
@@ -15,17 +15,15 @@ private:
 	}
 
 public:
-	TrackedVec2(glm::vec2 initialValue, std::function<void()> callback)
+	Position2D(glm::vec2 initialValue, std::function<void()> callback = nullptr)
 		: value(initialValue), onModify(callback) {}
 
-	// Чтение как vec2
 	operator glm::vec2() const
 	{
 		return value;
 	}
 
-	// Присвоение
-	TrackedVec2 &operator=(glm::vec2 newValue)
+	Position2D &operator=(glm::vec2 newValue)
 	{
 		if (value != newValue)
 		{
@@ -35,28 +33,28 @@ public:
 		return *this;
 	}
 
-	TrackedVec2 &operator+=(glm::vec2 rhs)
+	Position2D &operator+=(glm::vec2 rhs)
 	{
 		value += rhs;
 		NotifyChange();
 		return *this;
 	}
 
-	TrackedVec2 &operator-=(glm::vec2 rhs)
+	Position2D &operator-=(glm::vec2 rhs)
 	{
 		value -= rhs;
 		NotifyChange();
 		return *this;
 	}
 
-	TrackedVec2 &operator*=(float rhs)
+	Position2D &operator*=(float rhs)
 	{
 		value *= rhs;
 		NotifyChange();
 		return *this;
 	}
 
-	TrackedVec2 &operator/=(float rhs)
+	Position2D &operator/=(float rhs)
 	{
 		value /= rhs;
 		NotifyChange();

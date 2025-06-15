@@ -66,7 +66,7 @@ void ImGuiContext::RenderDebugUI(std::unique_ptr<GameWindow> &m_Window, EventSys
 	// ! Информация о системе
 	ImGui::Text("Window:");
 	int width, height;
-	glfwGetWindowSize(m_Window->GetWindow(), &width, &height);
+	glfwGetWindowSize(m_Window->GetWindowGLFW(), &width, &height);
 	ImGui::Text("  Size: %d x %d", width, height);
 	ImGui::Text("  Last resize: %d x %d (%.2f sec ago)",
 				events.m_LastWindowSize.w, events.m_LastWindowSize.h,
@@ -136,6 +136,7 @@ void ImGuiContext::RenderDebugUI(std::unique_ptr<GameWindow> &m_Window, EventSys
 	ImGui::End();
 }
 
+/*
 void ImGuiContext::ShowSettingsWindow(bool *open, std::unique_ptr<GameWindow> &m_Window)
 {
 	if (!ImGui::Begin("Settings", open))
@@ -303,7 +304,7 @@ void ImGuiContext::ShowSettingsWindow(bool *open, std::unique_ptr<GameWindow> &m
 	{
 		settings.Save();
 		// ! Применить настройки
-		m_Window->ApplySettings(settings);
+		// m_Window->ApplySettings(settings);
 	}
 
 	ImGui::SameLine();
@@ -316,6 +317,7 @@ void ImGuiContext::ShowSettingsWindow(bool *open, std::unique_ptr<GameWindow> &m
 
 	ImGui::End();
 }
+*/
 
 void ImGuiContext::RenderObjectUI(Transform &transform)
 {
@@ -326,7 +328,7 @@ void ImGuiContext::RenderObjectUI(Transform &transform)
 		// Изменения уже внесены благодаря ссылке
 	}
 
-	if (ImGui::DragFloat2("Origin", &transform.Origin.x(), 0.01f, 0.0f, 0.5f))
+	if (ImGui::DragFloat2("Origin", &transform.Origin.x, 0.01f, 0.0f, 0.5f))
 	{
 		// То же самое
 	}

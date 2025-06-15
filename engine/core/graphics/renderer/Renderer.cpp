@@ -1,11 +1,4 @@
 #include <engine/core/graphics/renderer/Renderer.hpp>
-#include <GL/glew.h>
-#include <glm/gtc/matrix_transform.hpp>
-#include <vector>
-#include <engine/core/graphics/shaders/ShaderManager.hpp>
-#include <engine/core/SpatialPartitioning.hpp>
-#include <GLFW/glfw3.h>
-
 
 Renderer &Renderer::Get()
 {
@@ -16,11 +9,11 @@ Renderer &Renderer::Get()
 bool Renderer::IsVisible(const Transform &transform)
 {
 	// Получаем view-projection матрицу
-	glm::mat4 vp = GetViewProjectionMatrix();
+	glm::mat4 viewProjectionMatrix = GetViewProjectionMatrix();
 
 	// Преобразуем координаты объекта (учитываем позицию и масштаб)
 	// Создаем vec4, явно указывая все компоненты
-	glm::vec4 clipPos = vp * glm::vec4(transform.Position.x(), transform.Position.y(), 0.0f, 1.0f);
+	glm::vec4 clipPos = viewProjectionMatrix * glm::vec4(transform.Position.x(), transform.Position.y(), 0.0f, 1.0f);
 
 	// Нормализуем координаты
 	glm::vec2 ndc = glm::vec2(clipPos.x, clipPos.y) / clipPos.w;
@@ -135,7 +128,7 @@ void Renderer::SetViewportSize(int width, int height)
 #pragma endregion
 
 #pragma region Основной метод отрисовки спрайта
-void Renderer::Render(const Texture2D &texture, const RenderParams &params)
+void Renderer::RenderSprite(const Texture2D &texture, const RenderParams &params)
 {
 	m_BatchQueue.emplace_back(&texture, params);
 }
@@ -224,6 +217,7 @@ void Renderer::EndBatch()
 #pragma endregion
 
 #pragma region Рисования
+/*
 void Renderer::DrawDebugGrid(const SpatialPartitioning &grid, const glm::vec4 &color)
 {
 	int cellSize = grid.GetCellSize();
@@ -243,6 +237,7 @@ void Renderer::DrawDebugGrid(const SpatialPartitioning &grid, const glm::vec4 &c
 		}
 	}
 }
+*/
 
 void Renderer::DrawRectOutline(const glm::vec2 &position, const glm::vec2 &size, const glm::vec4 &color)
 {
@@ -289,7 +284,7 @@ void Renderer::DrawRectOutline(const glm::vec2 &position, const glm::vec2 &size,
 	// Настраиваем шейдер
 	shader->Use();
 	shader->setMat4("model", glm::mat4(1.0f));
-	shader->setMat4("projection", m_projection); // Доступ к проекции через Get()
+	shader->setMat4("projection", m_projection);
 	shader->setVec4("spriteColor", color);
 	shader->setVec2("texCoordStart", glm::vec2(0.0f));
 	shader->setVec2("texCoordEnd", glm::vec2(1.0f));
@@ -306,13 +301,11 @@ void Renderer::DrawRectOutline(const glm::vec2 &position, const glm::vec2 &size,
 #pragma endregion
 
 #pragma region Камера
-void Renderer::SetCamera(const Camera &camera, const Transform &transform)
+void Renderer::SetCamera(const Camera2D &camera, const RenderParams &params)
 {
 	m_view = glm::mat4(1.0f);
-	m_view = glm::translate(m_view, glm::vec3(glm::vec2{transform.Position.x(), transform.Position.y()}, 0.0f));
+	m_view = glm::translate(m_view, glm::vec3(params.Position, 0.0f));
+	m_view = glm::rotate(m_view, glm::radians(params.Rotation), glm::vec3(0.0f, 0.0f, 1.0f));
 	m_view = glm::scale(m_view, glm::vec3(camera.zoom, camera.zoom, 1.0f));
-
-	// Если нужно вращение:
-	// m_view = glm::rotate(m_view, glm::radians(camera.rotation), glm::vec3(0.0f, 0.0f, 1.0f));
 }
 #pragma endregion

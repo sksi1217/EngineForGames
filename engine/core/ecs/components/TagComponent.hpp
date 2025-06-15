@@ -1,5 +1,5 @@
 #pragma once
-#include <string>
+#include <engine/engineapi.hpp>
 
 // ! Тег объекта
 struct TagComponent

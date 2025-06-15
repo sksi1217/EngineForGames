@@ -1,14 +1,13 @@
 #pragma once
 
+#include <engine/engineapi.hpp>
+
 #include <extern/imgui/imgui.h>
 #include <extern/imgui/backends/imgui_impl_glfw.h>
-#include <engine/core/graphics/renderer/Renderer.hpp>
-#include <engine/core/window/GameWindow.hpp>
-#include <engine/core/EngineState.hpp>
 
-#include <engine/core/utils/Logger.hpp>
+struct EngineState;
 
-struct EventSystem
+class EventSystem
 {
 private:
 	// ! Типы коллбэков
@@ -119,12 +118,6 @@ private:
 	static void GLFWCharCallback(GLFWwindow *window, unsigned int codepoint);
 
 public:
-	static EventSystem &Get()
-	{
-		static EventSystem instance;
-		return instance;
-	}
-
 	KeyEvent m_LastKeyEvent;
 	MouseButtonEvent m_LastMouseButtonEvent;
 	MousePos m_LastMousePos;

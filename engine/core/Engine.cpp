@@ -1,6 +1,5 @@
 #include <engine/core/Engine.hpp>
-#include <random>
-#include <thread>
+
 #include <tests/ExampleScript.hpp>
 #include <tests/Script.hpp>
 #include <tests/CameraController.hpp>
@@ -25,12 +24,14 @@ void Engine::Initialize()
 	utils::Logger::info("Application started");
 
 	// ! Загружаем настройки
-	Settings::Get().Load();
+	// Settings::Get().Load();
 
 	// ! Инициализация окна
-	auto &settings = Settings::Get();
-	m_Window = std::make_unique<GameWindow>("My Game Engine", settings.graphics.resolution.x, settings.graphics.resolution.y);
-	m_Window->ApplySettings(settings);
+	// auto &settings = Settings::Get();
+	m_Window = std::make_unique<GameWindow>();
+	m_Window->SetTitle("My Game Engine");
+	// m_Window->SetSize(settings.graphics.resolution.x, settings.graphics.resolution.y);
+	// m_Window->ApplySettings(settings);
 
 	// ! Инициализация GLEW
 	glewExperimental = GL_TRUE;
@@ -41,15 +42,21 @@ void Engine::Initialize()
 	}
 
 	// ! Инициализация OpenGL контекста
-	glContext.Init(m_Window->GetWindow());
+	glContext.Init(m_Window->GetWindowGLFW());
 
 	// ! Инициализация System Event
-	events.Init(m_Window->GetWindow(), &m_State);
+	events.Init(m_Window->GetWindowGLFW(), &m_State);
 
 	// ! Инициализация ImGui
-	ImGuiContext::Init(m_Window->GetWindow());
-
+	ImGuiContext::Init(m_Window->GetWindowGLFW());
 	spatialPartitioning = new SpatialPartitioning(2000, 1000);
+
+	// ! Добавления камеры
+	auto &registry = ECS::Get().GetRegistry();
+	GameObject camera = GameObject::CreateObject(registry);
+	camera.SetName("Main Camera");
+	auto &camera2D = camera.AddComponent<Camera2D>();
+	camera2D.isMain = true;
 
 	// ? Временное решение
 	// ! Загружаем текстуры
@@ -68,22 +75,10 @@ void Engine::Initialize()
 	std::uniform_real_distribution<float> distX(0.0f, 800.0f);
 	std::uniform_real_distribution<float> distY(0.0f, 600.0f);
 
-	auto &registry = ECS::Get().GetRegistry();
-
-	GameObject cameraObj = GameObject::Create(registry);
-
-	auto &transformCam = cameraObj.GetComponent<Transform>();
-	transformCam.Position = {0, 0};
-
-	cameraObj.SetName("Main Camera");
-	auto &camera = cameraObj.AddComponent<Camera>();
-	camera.isMain = true;
-	cameraObj.AddScript<CameraController>();
-
-	for (int i = 0; i < 1; ++i)
+	for (int i = 0; i < 10; ++i)
 	{
 
-		GameObject entity = GameObject::Create(registry);
+		GameObject entity = GameObject::CreateObject(registry);
 
 		// Генерация случайной позиции
 		float x = distX(gen);
@@ -91,12 +86,16 @@ void Engine::Initialize()
 
 		// Добавление компонентов
 		auto &transform = entity.GetComponent<Transform>();
-		transform.Position = {640, 100};
+		transform.Position = {x, y};
 
-		auto &spriteRender = entity.AddComponent<SpriteRenderer>(texture.get());
+		auto &spriteRender = entity.AddComponent<Sprite>(texture.get());
 		spriteRender.OrderLayer = 1;
-		entity.AddScript<ExampleScript>();
-		entity.AddScript<Script>();
+		if (i == 0)
+		{
+			entity.AddScript<ExampleScript>();
+			entity.AddScript<Script>();
+		}
+
 		spatialPartitioning->AddObject(entity.entity);
 
 		printf("Created object %d with entity id: %u\n", i, static_cast<uint32_t>(entity.entity));
@@ -114,6 +113,7 @@ void Engine::Run()
 		if (m_Window->IsFocused())
 		{
 			utils::Time::Update();
+			InputManager::Get().Update(m_Window->GetWindowGLFW());
 
 			glfwPollEvents();
 
@@ -133,6 +133,7 @@ void Engine::Run()
 
 void Engine::Update()
 {
+
 	movementSystem.Update(*spatialPartitioning);
 	collisionSystem.Update(*spatialPartitioning);
 	scriptSystem.Update();
@@ -173,7 +174,7 @@ void Engine::Draw()
 
 	if (m_State.showSettingsWindow)
 	{
-		ImGuiContext::ShowSettingsWindow(&m_State.showSettingsWindow, m_Window);
+		// ImGuiContext::ShowSettingsWindow(&m_State.showSettingsWindow, m_Window);
 	}
 	// ! Конец кадра ImGui
 	ImGuiContext::EndFrame();

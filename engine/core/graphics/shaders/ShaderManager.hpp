@@ -3,8 +3,10 @@
 #include <string>
 #include <unordered_map>
 #include <memory>
-#include <engine/core/graphics/shaders/Shader.hpp>
-#include <engine/core/utils/Logger.hpp>
+
+#include <engine/engineapi.hpp>
+
+#include <iostream>
 
 class Shader;
 
@@ -13,13 +15,13 @@ class ShaderManager
 public:
 	static ShaderManager &Get();
 
-	// Инициализация — загружаем дефолтный шейдер
+	// ! Инициализация загружаем дефолтный шейдер
 	void Init();
 
-	// Получение дефолтного шейдера
-	std::shared_ptr<Shader> GetDefaultShader() const { return m_DefaultShader; }
+	// ! Получение дефолтного шейдера
+	std::shared_ptr<Shader> const GetDefaultShader();
 
-	// Загрузка любого шейдера с кэшированием
+	// ! Загрузка любого шейдера с кэшированием
 	std::shared_ptr<Shader> LoadShader(const std::string &vertexPath, const std::string &fragmentPath);
 
 private:

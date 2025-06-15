@@ -1,5 +1,4 @@
 #include <engine/core/SpatialPartitioning.hpp>
-#include <algorithm>
 
 SpatialPartitioning::SpatialPartitioning(int screenWidth, int screenHeight)
 {
@@ -32,18 +31,6 @@ void SpatialPartitioning::AddObject(entt::entity entity)
 	{
 		m_Grid[gridPos.x][gridPos.y].push_back(entity);
 	}
-}
-
-const std::vector<entt::entity> &SpatialPartitioning::GetCell(int x, int y) const
-{
-	static std::vector<entt::entity> empty;
-
-	if (x >= 0 && x < m_GridWidth && y >= 0 && y < m_GridHeight)
-	{
-		return m_Grid[x][y];
-	}
-
-	return empty; // безопасный возврат, если индекс вне диапазона
 }
 
 SpatialPartitioning::GridPos SpatialPartitioning::PositionToGridPos(const glm::vec2 &position) const
@@ -96,7 +83,8 @@ void SpatialPartitioning::UpdateObjectPosition(entt::entity entity, const glm::v
 	}
 }
 
-std::vector<entt::entity> SpatialPartitioning::GetNearbyObjects(const glm::vec2 &position) const
+// ! Geters
+std::vector<entt::entity> SpatialPartitioning::GetNearbyObjects(const glm::vec2 &position)
 {
 	GridPos pos = PositionToGridPos(position);
 	std::vector<entt::entity> result;
@@ -117,6 +105,18 @@ std::vector<entt::entity> SpatialPartitioning::GetNearbyObjects(const glm::vec2 
 	}
 
 	return result;
+}
+
+const std::vector<entt::entity> &SpatialPartitioning::GetCell(int x, int y)
+{
+	static std::vector<entt::entity> empty;
+
+	if (x >= 0 && x < m_GridWidth && y >= 0 && y < m_GridHeight)
+	{
+		return m_Grid[x][y];
+	}
+
+	return empty; // безопасный возврат, если индекс вне диапазона
 }
 
 void SpatialPartitioning::DrawDebug()

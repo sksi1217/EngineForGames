@@ -408,12 +408,6 @@ void EventSystem::SetupCallbacks()
 	AddKeyCallback(
 		[this](int key, int scancode, int action, int mods)
 		{
-			// ! Обновляем состояние клавиш
-			if (key >= 0 && key < 512)
-			{
-				m_EngineState->keys[key] = (action != GLFW_RELEASE);
-			}
-
 			// ! Сохраняем информацию о событии
 			m_LastKeyEvent = {key, scancode, action, mods, static_cast<float>(glfwGetTime())};
 
@@ -437,11 +431,6 @@ void EventSystem::SetupCallbacks()
 	AddMouseButtonCallback(
 		[this](int button, int action, int mods)
 		{
-			if (button >= 0 && button < 8)
-			{
-				m_EngineState->mouseButtons[button] = (action != GLFW_RELEASE);
-			}
-
 			// ! Сохраняем информацию о событии
 			m_LastMouseButtonEvent = {
 				button,
@@ -459,9 +448,6 @@ void EventSystem::SetupCallbacks()
 	AddMousePosCallback(
 		[this](double x, double y)
 		{
-			m_EngineState->mouseX = x;
-			m_EngineState->mouseY = y;
-
 			// ! Сохраняем позицию мыши
 			m_LastMousePos = {x, y};
 			m_LastMouseMoveTime = static_cast<float>(glfwGetTime());

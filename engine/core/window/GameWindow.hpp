@@ -1,26 +1,17 @@
 #pragma once
 
-#include <GLFW/glfw3.h>
-#include <engine/core/utils/Logger.hpp>
-#include <extern/stb/stb_image.h>
-#include <functional>
-#include <stdexcept>
-#include <iostream>
-#include <string>
+#include <engine/engineapi.hpp>
 
-#include <engine/core/ui/Settings.hpp>
+// #include <engine/core/ui/Settings.hpp>
 
 class GameWindow
 {
 public:
-	GameWindow() = default; // ИСПРАВИТЬ (нужно чтобы было только 1 метод GameWindow)
-	GameWindow(const std::string &title, int width, int height);
+	GameWindow();
 	~GameWindow();
 
-	static GameWindow &Get();
-
 	// ! Основные операции
-	void SwapBuffers() const;
+	void SwapBuffers();
 	void Close();
 	void SetVSync(bool enabled);
 
@@ -34,19 +25,20 @@ public:
 	void SetIcon(const std::string &iconPath);
 
 	// ! Состояние окна
-	bool ShouldClose() const;
-	bool IsVSyncEnabled() const;
-	bool IsMaximized() const;
-	bool IsMinimized() const;
-	bool IsFocused() const;
+	bool ShouldClose();
+	bool IsVSyncEnabled();
+	bool IsMaximized();
+	bool IsMinimized();
+	bool IsFocused();
 
 	// ! Получение параметров
-	std::pair<int, int> GetSize() const;
-	std::pair<int, int> GetPosition() const;
-	std::pair<float, float> GetContentScale() const;
-	std::string GetTitle() const;
-	inline GLFWwindow *GetWindow() const { return m_Window; }
+	std::pair<int, int> GetSize();
+	std::pair<int, int> GetPosition();
+	std::pair<float, float> GetContentScale();
+	std::string GetTitle();
+	GLFWwindow *GetWindowGLFW();
 
+	/*
 	// ! применения настроек ИСПРАВИТЬ
 	void ApplySettings(const Settings &settings);
 
@@ -55,10 +47,11 @@ public:
 	void ApplyUISettings(const UISettings &ui);
 	void ApplyGameSettings(const GameSettings &game);
 	void ApplyAdvancedSettings(const AdvancedSettings &advanced);
+	*/
 
 private:
 	GLFWwindow *m_Window;
-	std::string m_Title;
-	int m_Width, m_Height;
+	std::string m_Title = "Window";
+	int m_Width = 1280, m_Height = 720;
 	bool m_VSync;
 };

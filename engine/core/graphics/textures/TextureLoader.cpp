@@ -3,7 +3,6 @@
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <extern/stb/stb_image.h>
-#include <iostream>
 
 // Инициализация статического кэша
 std::unordered_map<std::string, std::shared_ptr<Texture2D>> TextureLoader::textureCache;

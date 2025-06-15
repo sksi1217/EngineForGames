@@ -1,27 +1,32 @@
 #include <engine/core/Systems.hpp>
-#include <engine/core/ui/ImGuiContext.hpp>
-#include <engine/core/ecs/components/SpriteRenderer.hpp>
 
 // ! Система рендера объектов
 
 void CameraSystem::Update(entt::registry &registry, Renderer &renderer)
 {
-	auto view = registry.view<Transform, Camera>();
+	auto view = registry.view<Transform, Camera2D>();
 	for (auto entity : view)
 	{
-		auto [transform, camera] = view.get<Transform, Camera>(entity);
+		auto [transform, camera] = view.get<Transform, Camera2D>(entity);
 		if (camera.isMain)
 		{
 			// Обновляем позицию камеры на основе transform
-			Camera adjustedCamera = camera;
+			Camera2D adjustedCamera = camera;
+
+			RenderParams params;
+			params.Position = transform.Position;
+			params.Scale = transform.Scale;
+			params.Rotation = transform.Rotation;
+			params.Origin = transform.Origin;
+
 			// adjustedCamera.offset = transform.Position;
-			renderer.SetCamera(adjustedCamera, transform);
+			renderer.SetCamera(adjustedCamera, params);
 			return;
 		}
 	}
 
 	// Камера по умолчанию
-	static Camera defaultCamera;
+	static Camera2D defaultCamera;
 	// Transform transform;
 	// renderer.SetCamera(defaultCamera, *transform);
 }
@@ -35,8 +40,8 @@ void RenderSystem::Update()
 	CameraSystem cameraSystem;
 	cameraSystem.Update(registry, renderer);
 
-	// Получаем все объекты со SpriteRenderer и Transform
-	auto view = registry.view<Transform, SpriteRenderer>();
+	// Получаем все объекты со Sprite и Transform
+	auto view = registry.view<Transform, Sprite>();
 
 	// Копируем только видимые сущности и сортируем их
 	std::vector<entt::entity> visibleEntities;
@@ -53,24 +58,23 @@ void RenderSystem::Update()
 
 	// Сортируем только видимые объекты по OrderLayer
 	std::sort(visibleEntities.begin(), visibleEntities.end(), [&](auto lhs, auto rhs)
-			  { return registry.get<SpriteRenderer>(lhs).OrderLayer < registry.get<SpriteRenderer>(rhs).OrderLayer; });
+			  { return registry.get<Sprite>(lhs).OrderLayer < registry.get<Sprite>(rhs).OrderLayer; });
 
 	// Рендерим в отсортированном порядке
 	for (auto entity : visibleEntities)
 	{
 		const auto &transform = registry.get<Transform>(entity);
-		const auto &sprite = registry.get<SpriteRenderer>(entity);
+		const auto &sprite = registry.get<Sprite>(entity);
 
-		Renderer::RenderParams params;
+		RenderParams params;
 		params.Position = transform.Position;
 		params.Scale = transform.Scale;
 		params.Rotation = transform.Rotation;
-		params.Color = sprite.Color;
 		params.Origin = transform.Origin;
 
 		if (sprite.Sprite)
 		{
-			renderer.Render(*sprite.Sprite, params);
+			renderer.RenderSprite(*sprite.Sprite, params);
 		}
 	}
 }

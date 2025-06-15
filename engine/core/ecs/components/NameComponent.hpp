@@ -1,5 +1,5 @@
 #pragma once
-#include <string>
+#include <engine/engineapi.hpp>
 
 // ! Имя объекта
 struct NameComponent

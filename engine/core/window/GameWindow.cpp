@@ -3,7 +3,7 @@
 // ! Начальные методы
 #pragma region Начальные методы
 
-GameWindow::GameWindow(const std::string &title, int width, int height) : m_Title(title), m_Width(width), m_Height(height)
+GameWindow::GameWindow()
 {
 	utils::Logger::info("Initializing GLFW...");
 
@@ -20,7 +20,7 @@ GameWindow::GameWindow(const std::string &title, int width, int height) : m_Titl
 
 	// ! Создание окна
 	utils::Logger::info("Creating GLFW window...");
-	m_Window = glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
+	m_Window = glfwCreateWindow(m_Width, m_Height, m_Title.c_str(), nullptr, nullptr);
 
 	// ! Проверка
 	if (!m_Window)
@@ -34,12 +34,6 @@ GameWindow::GameWindow(const std::string &title, int width, int height) : m_Titl
 	glfwSwapInterval(m_VSync ? 1 : 0);
 }
 
-GameWindow &GameWindow::Get()
-{
-	static GameWindow instance;
-	return instance;
-}
-
 GameWindow::~GameWindow()
 {
 	utils::Logger::info("Destroying GLFW window...");
@@ -51,7 +45,7 @@ GameWindow::~GameWindow()
 // ! Основные операции
 #pragma region Основные операции
 
-void GameWindow::SwapBuffers() const
+void GameWindow::SwapBuffers()
 {
 	if (!m_Window)
 	{
@@ -141,27 +135,27 @@ void GameWindow::SetIcon(const std::string &iconPath)
 // ! Состояние окна
 #pragma region Состояние окна
 
-bool GameWindow::ShouldClose() const
+bool GameWindow::ShouldClose()
 {
 	return glfwWindowShouldClose(m_Window);
 }
 
-bool GameWindow::IsVSyncEnabled() const
+bool GameWindow::IsVSyncEnabled()
 {
 	return m_VSync;
 }
 
-bool GameWindow::IsMaximized() const
+bool GameWindow::IsMaximized()
 {
 	return glfwGetWindowAttrib(m_Window, GLFW_MAXIMIZED);
 }
 
-bool GameWindow::IsMinimized() const
+bool GameWindow::IsMinimized()
 {
 	return glfwGetWindowAttrib(m_Window, GLFW_ICONIFIED);
 }
 
-bool GameWindow::IsFocused() const
+bool GameWindow::IsFocused()
 {
 	return glfwGetWindowAttrib(m_Window, GLFW_FOCUSED);
 }
@@ -171,34 +165,37 @@ bool GameWindow::IsFocused() const
 // ! Получение параметров
 #pragma region Получение параметров
 
-std::pair<int, int> GameWindow::GetSize() const
+std::pair<int, int> GameWindow::GetSize()
 {
 	int width, height;
 	glfwGetWindowSize(m_Window, &width, &height);
 	return {width, height};
 }
 
-std::pair<int, int> GameWindow::GetPosition() const
+std::pair<int, int> GameWindow::GetPosition()
 {
 	int x, y;
 	glfwGetWindowPos(m_Window, &x, &y);
 	return {x, y};
 }
 
-std::pair<float, float> GameWindow::GetContentScale() const
+std::pair<float, float> GameWindow::GetContentScale()
 {
 	float xscale, yscale;
 	glfwGetWindowContentScale(m_Window, &xscale, &yscale);
 	return {xscale, yscale};
 }
 
-std::string GameWindow::GetTitle() const
+std::string GameWindow::GetTitle()
 {
 	return m_Title;
 }
 
+GLFWwindow *GameWindow::GetWindowGLFW() { return m_Window; }
+
 #pragma endregion
 
+/*
 // ! Настройки
 #pragma region Настройки
 void GameWindow::ApplySettings(const Settings &settings)
@@ -302,12 +299,16 @@ void GameWindow::ApplySettings(const Settings &settings)
 
 	// ! Применение расширенных настроек
 	ApplyAdvancedSettings(settings.advanced);
-}
-#pragma endregion
 
+}
+
+#pragma endregion
+*/
+
+/*
 void GameWindow::ApplyAudioSettings(const AudioSettings &audio)
 {
-	/*
+
 	// Пример: установка громкости через аудио-движок
 	AudioEngine::SetMasterVolume(audio.masterVolume);
 	AudioEngine::SetMusicVolume(audio.musicVolume);
@@ -329,12 +330,12 @@ void GameWindow::ApplyAudioSettings(const AudioSettings &audio)
 	}
 
 	AudioEngine::MuteAll(audio.muteAll);
-	*/
+
 }
 
 void GameWindow::ApplyControlSettings(const ControlsSettings &controls)
 {
-	/*
+
 	InputManager::SetKeyBinding("MoveForward", controls.moveForward);
 	InputManager::SetKeyBinding("MoveBack", controls.moveBack);
 	InputManager::SetKeyBinding("MoveLeft", controls.moveLeft);
@@ -344,33 +345,33 @@ void GameWindow::ApplyControlSettings(const ControlsSettings &controls)
 
 	InputManager::SetMouseSensitivity(controls.mouseSensitivity);
 	InputManager::SetInvertYAxis(controls.invertYAxis);
-	*/
+
 }
 
 void GameWindow::ApplyUISettings(const UISettings &ui)
 {
-	/*
+
 	UIRenderer::SetScale(ui.uiScale);
 	UIRenderer::SetHudTransparency(ui.hudTransparency);
 	UIRenderer::SetLanguage(ui.language);
 	UIRenderer::SetShowHints(ui.showHints);
 	UIRenderer::SetHideHUDInGame(ui.hideHUDInGame);
 	UIRenderer::SetAutoScaleUI(ui.autoScaleUI);
-	*/
+
 }
 
 void GameWindow::ApplyGameSettings(const GameSettings &game)
 {
-	/*
+
 	GameplaySystem::SetAutoSaveEnabled(game.autoSave);
 	MapSystem::SetMinimapVisible(game.showMinimap);
-	*/
+
 }
 
-void GameWindow::ApplyAdvancedSettings(const AdvancedSettings &advanced)
-{
-	/*
+void GameWindow::ApplyAdvancedSettings(const AdvancedSettings &advanced){
+
 	DebugConsole::SetEnabled(advanced.developerMode);
 	Profiler::SetEnabled(advanced.developerMode);
-	*/
+
 }
+*/

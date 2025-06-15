@@ -1,32 +1,29 @@
 #include <engine/core/graphics/shaders/Shader.hpp>
-#include <fstream>
-#include <sstream>
-#include <iostream>
 
-Shader::Shader() : programID(0) {}
+Shader::Shader() : id(0) {}
 
 Shader::~Shader()
 {
 	utils::Logger::info("Delete Shader!");
-	if (programID != 0)
+	if (id != 0)
 	{
-		glDeleteProgram(programID);
+		glDeleteProgram(id);
 	}
 }
 
 bool Shader::loadFromFile(const std::string &vertexPath, const std::string &fragmentPath)
 {
-	// Загрузка исходного кода шейдеров
+	// ! Загрузка исходного кода шейдеров
 	std::string vertexSource = loadShaderSource(vertexPath);
 	std::string fragmentSource = loadShaderSource(fragmentPath);
 
 	if (vertexSource.empty() || fragmentSource.empty())
 	{
-		std::cerr << "Failed to load shader source files." << std::endl;
+		utils::Logger::error("Failed to load shader source files.");
 		return false;
 	}
 
-	// Компиляция шейдеров
+	// ! Компиляция шейдеров
 	GLuint vertexShader = compileShader(GL_VERTEX_SHADER, vertexSource);
 	GLuint fragmentShader = compileShader(GL_FRAGMENT_SHADER, fragmentSource);
 
@@ -35,24 +32,26 @@ bool Shader::loadFromFile(const std::string &vertexPath, const std::string &frag
 		return false;
 	}
 
-	// Создание программы
-	programID = glCreateProgram();
-	glAttachShader(programID, vertexShader);
-	glAttachShader(programID, fragmentShader);
-	glLinkProgram(programID);
+	// ! Создание программы
+	id = glCreateProgram();
+	glAttachShader(id, vertexShader);
+	glAttachShader(id, fragmentShader);
+	glLinkProgram(id);
 
-	// Проверка успешности связывания
+	// ! Проверка успешности связывания
 	GLint success;
-	glGetProgramiv(programID, GL_LINK_STATUS, &success);
+	glGetProgramiv(id, GL_LINK_STATUS, &success);
 	if (!success)
 	{
 		GLchar infoLog[512];
-		glGetProgramInfoLog(programID, 512, nullptr, infoLog);
-		std::cerr << "Shader program linking failed: " << infoLog << std::endl;
+		glGetProgramInfoLog(id, 512, nullptr, infoLog);
+		std::stringstream ss;
+		ss << infoLog;
+		utils::Logger::error("Shader program linking failed: " + ss.str());
 		return false;
 	}
 
-	// Очистка скомпилированных шейдеров
+	// ! Очистка скомпилированных шейдеров
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
 
@@ -64,7 +63,9 @@ GLuint Shader::compileShader(GLenum type, const std::string &source)
 	GLuint shader = glCreateShader(type);
 	if (shader == 0)
 	{
-		std::cerr << "Failed to create shader of type: " << type << std::endl;
+		std::stringstream ss;
+		ss << type;
+		utils::Logger::error("Failed to create shader of type: " + ss.str());
 		return 0;
 	}
 
@@ -72,14 +73,16 @@ GLuint Shader::compileShader(GLenum type, const std::string &source)
 	glShaderSource(shader, 1, &sourceCStr, nullptr);
 	glCompileShader(shader);
 
-	// Проверка успешности компиляции
+	// ! Проверка успешности компиляции
 	GLint success;
 	glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
 	if (!success)
 	{
 		GLchar infoLog[512];
 		glGetShaderInfoLog(shader, 512, nullptr, infoLog);
-		std::cerr << "Shader compilation failed: " << infoLog << std::endl;
+		std::stringstream ss;
+		ss << infoLog;
+		utils::Logger::error("Shader compilation failed: " + ss.str());
 		glDeleteShader(shader);
 		return 0;
 	}
@@ -92,7 +95,9 @@ std::string Shader::loadShaderSource(const std::string &filePath)
 	std::ifstream file(filePath);
 	if (!file.is_open())
 	{
-		std::cerr << "Failed to open file: " << filePath << std::endl;
+		std::stringstream ss;
+		ss << filePath;
+		utils::Logger::error("Failed to open file: " + ss.str());
 		return "";
 	}
 
@@ -104,69 +109,76 @@ std::string Shader::loadShaderSource(const std::string &filePath)
 
 void Shader::Use() const
 {
-	glUseProgram(programID);
+	glUseProgram(id);
 }
 
 GLuint Shader::getProgramID() const
 {
-	return programID;
+	return id;
 }
 
-// Новый метод для установки uniform-переменной типа mat4
 void Shader::setMat4(const std::string &name, const glm::mat4 &matrix) const
 {
-	GLint location = glGetUniformLocation(programID, name.c_str());
+	GLint location = glGetUniformLocation(id, name.c_str());
 	if (location == -1)
 	{
-		std::cerr << "Uniform variable not found: " << name << std::endl;
+		std::stringstream ss;
+		ss << name;
+		utils::Logger::error("Uniform variable not found: " + ss.str());
 		return;
 	}
 	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
 }
 
-void Shader::setVec3(const std::string &name, const glm::vec3 &value) const
+void Shader::setVec2(const std::string &name, const glm::vec2 &value) const
 {
-	GLint location = glGetUniformLocation(programID, name.c_str());
+	int location = glGetUniformLocation(id, name.c_str());
 	if (location == -1)
 	{
-		std::cerr << "Uniform variable not found: " << name << std::endl;
+		std::stringstream ss;
+		ss << name;
+		utils::Logger::error("Uniform variable not found: " + ss.str());
+		return;
+	}
+
+	glUniform2fv(location, 1, glm::value_ptr(value));
+}
+
+void Shader::setVec3(const std::string &name, const glm::vec3 &value) const
+{
+	GLint location = glGetUniformLocation(id, name.c_str());
+	if (location == -1)
+	{
+		std::stringstream ss;
+		ss << name;
+		utils::Logger::error("Uniform variable not found: " + ss.str());
 		return;
 	}
 	glUniform3fv(location, 1, glm::value_ptr(value));
 }
 
-void Shader::setVec2(const std::string &name, const glm::vec2 &value) const
+void Shader::setVec4(const std::string &name, const glm::vec4 &value) const
 {
-	// Используем glGetUniformLocation для получения расположения uniform-переменной
-	int location = glGetUniformLocation(programID, name.c_str());
+	GLint location = glGetUniformLocation(id, name.c_str());
 	if (location == -1)
 	{
-		std::cerr << "Uniform variable '" << name << "' not found!" << std::endl;
+		std::stringstream ss;
+		ss << name;
+		utils::Logger::error("Uniform variable not found: " + ss.str());
 		return;
 	}
-
-	// Устанавливаем значение vec2 с помощью glUniform2fv
-	glUniform2fv(location, 1, glm::value_ptr(value));
+	glUniform4fv(location, 1, glm::value_ptr(value));
 }
 
 void Shader::setFloat(const std::string &name, float value) const
 {
-	GLint location = glGetUniformLocation(programID, name.c_str());
+	GLint location = glGetUniformLocation(id, name.c_str());
 	if (location == -1)
 	{
-		std::cerr << "Uniform variable not found: " << name << std::endl;
+		std::stringstream ss;
+		ss << name;
+		utils::Logger::error("Uniform variable not found: " + ss.str());
 		return;
 	}
 	glUniform1f(location, value);
-}
-
-void Shader::setVec4(const std::string &name, const glm::vec4 &value) const
-{
-	GLint location = glGetUniformLocation(programID, name.c_str());
-	if (location == -1)
-	{
-		std::cerr << "Uniform variable not found: " << name << std::endl;
-		return;
-	}
-	glUniform4fv(location, 1, glm::value_ptr(value));
 }

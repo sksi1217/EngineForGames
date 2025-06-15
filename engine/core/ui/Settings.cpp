@@ -1,5 +1,4 @@
 #include <engine/core/ui/Settings.hpp>
-#include <engine/core/utils/Logger.hpp>
 #include <fstream>
 #include <extern/nlohmann/json.hpp>
 

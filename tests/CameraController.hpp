@@ -1,8 +1,9 @@
 #pragma once
+#include <engine/engineapi.hpp>
+
 #include <engine/core/utils/Time.hpp>
 #include <engine/core/utils/Logger.hpp>
 #include <engine/core/ecs/components/ScriptComponent.hpp>
-#include <engine/core/ecs/components/Camera.hpp>
 #include <engine/core/events/EventSystem.hpp>
 
 class CameraController : public ScriptComponent

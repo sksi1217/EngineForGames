@@ -1,10 +1,5 @@
 #pragma once
-#include <engine/core/ecs/ECS.hpp>
-#include <engine/core/graphics/renderer/Renderer.hpp>
-
-#include <engine/core/utils/Time.hpp>
-
-#include <engine/core/SpatialPartitioning.hpp>
+#include <engine/engineapi.hpp>
 
 class CameraSystem
 {

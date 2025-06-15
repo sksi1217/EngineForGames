@@ -1,6 +1,5 @@
 #include <engine/core/graphics/shaders/ShaderManager.hpp>
 #include <filesystem>
-#include <iostream>
 
 // ! == для ShaderKey
 bool ShaderManager::ShaderKey::operator==(const ShaderKey &other) const
@@ -33,6 +32,8 @@ void ShaderManager::Init()
 		std::cerr << "Failed to load default shader!\n";
 	}
 }
+
+std::shared_ptr<Shader> const ShaderManager::GetDefaultShader() { return m_DefaultShader; }
 
 std::shared_ptr<Shader> ShaderManager::LoadShader(const std::string &vertexPath, const std::string &fragmentPath)
 {

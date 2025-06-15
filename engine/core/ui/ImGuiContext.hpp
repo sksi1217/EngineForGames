@@ -1,18 +1,10 @@
 #pragma once
 
-#include <iostream>
+#include <engine/engineapi.hpp>
 
 #include <extern/imgui/imgui.h>
 #include <extern/imgui/backends/imgui_impl_glfw.h>
 #include <extern/imgui/backends/imgui_impl_opengl3.h>
-
-#include <engine/core/utils/Time.hpp>
-
-#include <engine/core/scene/GameObject.hpp>
-
-#include <engine/core/events/EventSystem.hpp>
-#include <engine/core/window/GameWindow.hpp>
-
 class ImGuiContext
 {
 public:

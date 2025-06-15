@@ -1,14 +1,6 @@
 #pragma once
-#include <engine/core/scene/GameObject.hpp>
-#include <engine/core/graphics/renderer/Renderer.hpp>
-#include <extern/entt/entity/fwd.hpp>
 
-// #include <include/components/Components.hpp>
-
-#include <engine/core/ecs/ECS.hpp>
-#include <vector>
-#include <unordered_map>
-#include <glm/glm.hpp>
+#include <engine/engineapi.hpp>
 
 class SpatialPartitioning
 {
@@ -19,21 +11,18 @@ public:
 	// ! Добавление/удаление объекта
 	void AddObject(entt::entity entity);
 
-	const int GetGridWidth() const { return m_GridWidth; }
-	const int GetGridHeight() const { return m_GridHeight; }
-
-	int GetCellSize() const { return m_СellSize; }
-
-	const std::vector<entt::entity> &GetCell(int x, int y) const;
-
-	const std::vector<std::vector<std::vector<entt::entity>>> &GetGrid() const { return m_Grid; }
-
 	void DrawDebug();
 
 	void UpdateObjectPosition(entt::entity entity, const glm::vec2 &oldPosition);
 
+	// ! Geters
+	const int GetGridWidth() { return m_GridWidth; }
+	const int GetGridHeight() { return m_GridHeight; }
+	int GetCellSize() { return m_СellSize; }
+	const std::vector<entt::entity> &GetCell(int x, int y);
+	const std::vector<std::vector<std::vector<entt::entity>>> &GetGrid() { return m_Grid; }
 	// ? Возвращает список объектов, находящихся в ячейке по координатам позиции или в соседних ячейках
-	std::vector<entt::entity> GetNearbyObjects(const glm::vec2 &position) const;
+	std::vector<entt::entity> GetNearbyObjects(const glm::vec2 &position);
 
 private:
 	struct GridPositionComponent
