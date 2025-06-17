@@ -217,8 +217,8 @@ void Renderer::EndBatch()
 #pragma endregion
 
 #pragma region Рисования
-/*
-void Renderer::DrawDebugGrid(const SpatialPartitioning &grid, const glm::vec4 &color)
+
+void Renderer::DrawDebugGrid(SpatialPartitioning &grid, const glm::vec4 &color)
 {
 	int cellSize = grid.GetCellSize();
 	int gridWidth = grid.GetGridWidth();
@@ -237,7 +237,6 @@ void Renderer::DrawDebugGrid(const SpatialPartitioning &grid, const glm::vec4 &c
 		}
 	}
 }
-*/
 
 void Renderer::DrawRectOutline(const glm::vec2 &position, const glm::vec2 &size, const glm::vec4 &color)
 {

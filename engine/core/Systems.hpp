@@ -23,6 +23,12 @@ class CollisionSystem
 {
 public:
 	void Update(SpatialPartitioning &spatialPartitioning);
+
+private:
+	void ResolveCollision(entt::registry &registry, entt::entity a, entt::entity b);
+
+	bool CheckAABB(const BoxCollider2D &a, const Transform &ta, const BoxCollider2D &b, const Transform &tb);
+	void HandleCollision(entt::entity a, entt::entity b);
 };
 
 class ScriptSystem

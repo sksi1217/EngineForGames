@@ -34,6 +34,9 @@
 #include <engine/core/ecs/components/CircleCollider2D.hpp>
 #include <engine/core/ecs/components/Rigidbody2D.hpp>
 
+// ** Физика
+#include <engine/core/physics/Collision.hpp>
+
 // **
 #include <extern/stb/stb_image.h>
 

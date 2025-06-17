@@ -69,13 +69,19 @@ void Engine::Initialize()
 		return;
 	}
 
-	// Инициализация генератора случайных чисел
+	// Инициализация генератора случайных чисел для позиций
 	std::random_device rd;
 	std::mt19937 gen(rd());
 	std::uniform_real_distribution<float> distX(0.0f, 800.0f);
 	std::uniform_real_distribution<float> distY(0.0f, 600.0f);
 
-	for (int i = 0; i < 10; ++i)
+	// Инициализация генератора для размеров (ширина/высота)
+	std::random_device rd1;
+	std::mt19937 gen1(rd1());
+	std::uniform_real_distribution<float> wX(10.0f, 50.0f);
+	std::uniform_real_distribution<float> hY(10.0f, 50.0f);
+
+	for (int i = 0; i < 100; ++i)
 	{
 
 		GameObject entity = GameObject::CreateObject(registry);
@@ -84,19 +90,28 @@ void Engine::Initialize()
 		float x = distX(gen);
 		float y = distY(gen);
 
+		int xS = wX(gen1);
+		int yS = hY(gen1);
+
 		// Добавление компонентов
 		auto &transform = entity.GetComponent<Transform>();
 		transform.Position = {x, y};
+		transform.Scale = {xS, yS};
 
 		auto &spriteRender = entity.AddComponent<Sprite>(texture.get());
-		spriteRender.OrderLayer = 1;
+
+		entity.AddComponent<Rigidbody2D>();
+		auto &boxCollider = entity.AddComponent<BoxCollider2D>();
+
+		boxCollider.Scale = {xS, yS};
+
 		if (i == 0)
 		{
 			entity.AddScript<ExampleScript>();
-			entity.AddScript<Script>();
+			// entity.AddScript<Script>();
 		}
 
-		spatialPartitioning->AddObject(entity.entity);
+		spatialPartitioning->AddObject(entity.entity, {xS, yS});
 
 		printf("Created object %d with entity id: %u\n", i, static_cast<uint32_t>(entity.entity));
 	}
@@ -133,11 +148,28 @@ void Engine::Run()
 
 void Engine::Update()
 {
+	static int framesSinceLastUpdate = 0;
+	framesSinceLastUpdate++;
 
-	movementSystem.Update(*spatialPartitioning);
+	// Пересчитываем размер сетки каждые 60 кадров (1 раз в секунду)
+	if (framesSinceLastUpdate >= 10)
+	{
+		spatialPartitioning->UpdateCellSizeBasedOnObjects();
+		framesSinceLastUpdate = 0;
+	}
+
+	// Сначала обновляем физику и коллизии
 	collisionSystem.Update(*spatialPartitioning);
+
+	// Затем обновляем позиции и проверяем изменения
+	movementSystem.Update(*spatialPartitioning);
+
+	// Потом скрипты
 	scriptSystem.Update();
 	scriptSystem.FixedUpdate();
+
+	// И в конце рендер
+	renderSystem.Update();
 }
 
 void Engine::Draw()
@@ -148,9 +180,9 @@ void Engine::Draw()
 	Renderer::Get().BeginBatch();
 
 	// ! Выводим в консоль сколько объектов в spatialPartitioning
-	// spatialPartitioning->DrawDebug();
+	spatialPartitioning->DrawDebug();
 	// ! Рисуем всю сетку
-	// Renderer::Get().DrawDebugGrid(*spatialPartitioning, glm::vec4(1.0f, 0.0f, 0.0f, 0.5f));
+	Renderer::Get().DrawDebugGrid(*spatialPartitioning, glm::vec4(1.0f, 0.0f, 0.0f, 0.5f));
 
 	// ! Обновление всех систем
 	renderSystem.Update();

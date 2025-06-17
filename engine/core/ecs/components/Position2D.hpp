@@ -61,6 +61,11 @@ public:
 		return *this;
 	}
 
+	glm::vec2 operator+(const glm::vec2 &rhs) const
+	{
+		return value + rhs;
+	}
+
 	float x() const { return value.x; }
 	float y() const { return value.y; }
 

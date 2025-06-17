@@ -33,7 +33,7 @@ public:
 	void SetViewportSize(int width, int height);
 
 	// ** Вспомогательные методы
-	void DrawDebugGrid(const SpatialPartitioning &grid, const glm::vec4 &color);
+	void DrawDebugGrid(SpatialPartitioning &grid, const glm::vec4 &color);
 
 	void DrawRectOutline(const glm::vec2 &position, const glm::vec2 &size, const glm::vec4 &color);
 	// ** ---

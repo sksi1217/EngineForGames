@@ -51,6 +51,7 @@ public:
 			render.OrderLayer = -render.OrderLayer;
 		}
 
+		/*
 		// Ограничения движения внутри окна
 		if (transform.Position.x() < 0)
 			transform.Position.x() = 0;
@@ -60,5 +61,6 @@ public:
 			transform.Position.x() = screenBounds.x - transform.Scale.x;
 		if (transform.Position.y() + transform.Scale.y > screenBounds.y)
 			transform.Position.y() = screenBounds.y - transform.Scale.y;
+		*/
 	}
 };
