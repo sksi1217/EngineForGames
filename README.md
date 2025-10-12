@@ -73,3 +73,14 @@
 ## Автор
 
 <a href="https://github.com/sksi1217" target="_blank">GitHub профиль автора</a>
+
+
+## Как запустить
+
+Соберите проект с помощью CMake и запустите исполняемый файл:
+```
+cmake . -DBUILD_DEBUG=ON
+```
+```
+make -j$(nproc) && cd build && cd .. && ./build/myapp
+```
