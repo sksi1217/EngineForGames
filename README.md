@@ -46,8 +46,6 @@
 
 https://github.com/user-attachments/assets/f183dc18-252e-4a6a-8e48-a39a30143767
 
-
-
 <h3>Отладочная информация</h3>
 
 Встроенная панель Debug Info отображает (рис. 2):
@@ -91,3 +89,73 @@ cmake . -DBUILD_DEBUG=ON
 ```
 make -j$(nproc) && cd build && cd .. && ./build/myapp
 ```
+
+
+
+---
+
+
+# Что можно сделать в движке
+
+## Работа со скриптами и взаимодействие между объектами
+
+Движок поддерживает гибкую систему скриптов на основе ECS (Entity Component System). Вы можете не только добавлять пользовательские скрипты к игровым объектам, но и устанавливать связи между объектами — например, чтобы один объект управлял другим. 
+
+**Пример: переключение активности другого объекта**
+
+**1. Определение скрипта** 
+
+Внутри вашего скрипта вы можете хранить ссылку на другой объект через его `entt::entity` (уникальный идентификатор сущности). Это безопасно и соответствует принципам ECS: 
+```cpp
+class Script : public ScriptComponent
+{
+private:
+public:
+	entt::entity targetEntity = entt::null;
+
+	void Update() override
+	{
+		if (InputManager::Get().WasKeyPressed(GLFW_KEY_SPACE))
+		{
+			if (targetEntity != entt::null && registry)
+			{
+				Object target(*registry, targetEntity);
+				if (target.IsActive())
+				{
+					target.SetActive(false);
+				}
+				else
+				{
+					target.SetActive(true);
+				}
+			}
+		}
+	}
+};
+
+```
+## 2. Настройка объектов в коде
+При создании объектов вы можете связать их, передав entity одного объекта в скрипт другого:
+```cpp
+Object entity = Object::CreateObject(registry);
+auto &transform = entity.GetComponent<Transform>();
+transform.Position = {100, 100};
+transform.Scale = {100, 100};
+entity.AddComponent<Sprite>(texture.get());
+entity.AddScript<ExampleScript>();
+entity.AddScript<Script>();
+
+Object entity1 = Object::CreateObject(registry);
+auto &transform1 = entity1.GetComponent<Transform>();
+transform1.Position = {100, 100};
+transform1.Scale = {100, 100};
+entity1.AddComponent<Sprite>(texture.get());
+
+entity.GetScript<Script>().targetEntity = entity1.entity;
+```
+Теперь при нажатии Пробела первый объект будет включать/выключать второй.
+
+Эта система позволяет легко строить сложные взаимодействия между игровыми сущностями, сохраняя при этом чистоту архитектуры и безопасность памяти.
+
+---
+
