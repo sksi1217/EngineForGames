@@ -42,7 +42,7 @@
 </ul>
 
 
-Как выглядит:
+## Как выглядит:
 
 https://github.com/user-attachments/assets/f183dc18-252e-4a6a-8e48-a39a30143767
 
