@@ -51,12 +51,14 @@ void Engine::Initialize()
 	ImGuiContext::Init(m_Window->GetWindowGLFW());
 	spatialPartitioning = new SpatialPartitioning(2000, 1000);
 
-	// ! Добавления камеры
 	auto &registry = ECS::Get().GetRegistry();
-	GameObject camera = GameObject::CreateObject(registry);
+
+	// ! Добавления камеры
+	Object camera = Object::CreateObject(registry);
 	camera.SetName("Main Camera");
 	auto &camera2D = camera.AddComponent<Camera2D>();
 	camera2D.isMain = true;
+	camera.AddScript<CameraController>();
 
 	// ? Временное решение
 	// ! Загружаем текстуры
@@ -69,52 +71,25 @@ void Engine::Initialize()
 		return;
 	}
 
-	// Инициализация генератора случайных чисел для позиций
-	std::random_device rd;
-	std::mt19937 gen(rd());
-	std::uniform_real_distribution<float> distX(0.0f, 800.0f);
-	std::uniform_real_distribution<float> distY(0.0f, 600.0f);
+	Object entity = Object::CreateObject(registry);
+	auto &transform = entity.GetComponent<Transform>();
+	transform.Position = {100, 100};
+	transform.Scale = {100, 100};
+	entity.AddComponent<Sprite>(texture.get());
+	entity.AddScript<ExampleScript>();
+	entity.AddScript<Script>();
 
-	// Инициализация генератора для размеров (ширина/высота)
-	std::random_device rd1;
-	std::mt19937 gen1(rd1());
-	std::uniform_real_distribution<float> wX(10.0f, 50.0f);
-	std::uniform_real_distribution<float> hY(10.0f, 50.0f);
+	spatialPartitioning->AddObject(entity.entity, {transform.Position.x(), transform.Position.y()});
 
-	for (int i = 0; i < 100; ++i)
-	{
+	Object entity1 = Object::CreateObject(registry);
+	auto &transform1 = entity1.GetComponent<Transform>();
+	transform1.Position = {100, 100};
+	transform1.Scale = {100, 100};
+	entity1.AddComponent<Sprite>(texture.get());
 
-		GameObject entity = GameObject::CreateObject(registry);
+	entity.GetScript<Script>().targetEntity = entity1.entity;
 
-		// Генерация случайной позиции
-		float x = distX(gen);
-		float y = distY(gen);
-
-		int xS = wX(gen1);
-		int yS = hY(gen1);
-
-		// Добавление компонентов
-		auto &transform = entity.GetComponent<Transform>();
-		transform.Position = {x, y};
-		transform.Scale = {xS, yS};
-
-		auto &spriteRender = entity.AddComponent<Sprite>(texture.get());
-
-		entity.AddComponent<Rigidbody2D>();
-		auto &boxCollider = entity.AddComponent<BoxCollider2D>();
-
-		boxCollider.Scale = {xS, yS};
-
-		if (i == 0)
-		{
-			entity.AddScript<ExampleScript>();
-			// entity.AddScript<Script>();
-		}
-
-		spatialPartitioning->AddObject(entity.entity, {xS, yS});
-
-		printf("Created object %d with entity id: %u\n", i, static_cast<uint32_t>(entity.entity));
-	}
+	spatialPartitioning->AddObject(entity1.entity, {transform1.Position.x(), transform1.Position.y()});
 }
 
 void Engine::Run()
@@ -180,9 +155,9 @@ void Engine::Draw()
 	Renderer::Get().BeginBatch();
 
 	// ! Выводим в консоль сколько объектов в spatialPartitioning
-	spatialPartitioning->DrawDebug();
+	// spatialPartitioning->DrawDebug();
 	// ! Рисуем всю сетку
-	Renderer::Get().DrawDebugGrid(*spatialPartitioning, glm::vec4(1.0f, 0.0f, 0.0f, 0.5f));
+	// Renderer::Get().DrawDebugGrid(*spatialPartitioning, glm::vec4(1.0f, 0.0f, 0.0f, 0.5f));
 
 	// ! Обновление всех систем
 	renderSystem.Update();

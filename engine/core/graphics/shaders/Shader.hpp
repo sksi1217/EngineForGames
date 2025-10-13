@@ -1,11 +1,15 @@
 #pragma once
 
-#include <engine/engineapi.hpp>
+// #include <engine/engineapi.hpp>
 
 #include <fstream>
 #include <sstream>
-#include <glm/gtc/type_ptr.hpp>
 #include <engine/core/utils/Logger.hpp>
+
+#define GLFW_INCLUDE_NONE
+#include <GL/glew.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 class Shader
 {
@@ -14,7 +18,7 @@ public:
 	~Shader();
 
 	// ! Загрузка шейдеров из файлов
-	bool loadFromFile(const std::string &vertexPath, const std::string &fragmentPath);
+	bool LoadFromFile(const std::string &vertexPath, const std::string &fragmentPath);
 
 	// ! Использование программы
 	void Use() const;
@@ -33,6 +37,6 @@ private:
 	GLuint id; // ! ID шейдерной программы в OpenGL
 
 	// ! Вспомогательные методы
-	GLuint compileShader(GLenum type, const std::string &source);
-	std::string loadShaderSource(const std::string &filePath);
+	GLuint CompileShader(GLenum type, const std::string &source);
+	std::string LoadShaderSource(const std::string &filePath);
 };

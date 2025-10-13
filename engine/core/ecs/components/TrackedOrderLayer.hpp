@@ -1,6 +1,7 @@
 #pragma once
 #include <functional>
 
+/*
 class TrackedOrderLayer
 {
 private:
@@ -38,3 +39,4 @@ public:
 	bool operator<=(short other) const { return value <= other; }
 	bool operator>=(short other) const { return value >= other; }
 };
+*/

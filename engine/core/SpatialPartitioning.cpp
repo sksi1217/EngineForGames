@@ -1,4 +1,6 @@
 #include <engine/core/SpatialPartitioning.hpp>
+#include <iomanip>
+
 
 SpatialPartitioning::SpatialPartitioning(int screenWidth, int screenHeight)
 {

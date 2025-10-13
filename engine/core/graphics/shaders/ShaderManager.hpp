@@ -6,6 +6,8 @@
 
 #include <engine/engineapi.hpp>
 
+#include <engine/core/graphics/shaders/Shader.hpp>
+
 #include <iostream>
 
 class Shader;

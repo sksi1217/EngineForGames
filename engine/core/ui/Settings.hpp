@@ -49,6 +49,7 @@
 /
 */
 
+/*
 struct GraphicsSettings
 {
 	// Основные настройки
@@ -161,3 +162,8 @@ private:
 	Settings() = default;
 	static const std::string SETTINGS_FILE;
 };
+*/
+
+		// Сохраняем в файл
+		std::ofstream file(SETTINGS_FILE);
+		file << j.dump(4);

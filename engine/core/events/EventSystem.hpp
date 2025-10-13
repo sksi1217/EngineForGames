@@ -1,9 +1,13 @@
 #pragma once
 
-#include <engine/engineapi.hpp>
-
 #include <extern/imgui/imgui.h>
 #include <extern/imgui/backends/imgui_impl_glfw.h>
+#include <functional>
+#include <engine/core/utils/Logger.hpp>
+#include <engine/engineapi.hpp>
+#include <engine/core/graphics/renderer/Renderer.hpp>
+
+#include <GLFW/glfw3.h>
 
 struct EngineState;
 

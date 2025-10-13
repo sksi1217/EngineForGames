@@ -1,28 +1,31 @@
 #pragma once
 #include <engine/core/utils/Time.hpp>
 #include <engine/core/utils/Logger.hpp>
-#include <engine/core/scene/GameObject.hpp>
+#include <engine/core/ecs/components/CoreComponents.hpp>
+#include <engine/core/scene/Object.hpp>
 
 class Script : public ScriptComponent
 {
 private:
 public:
-	void Start() override
-	{
-	}
+	entt::entity targetEntity = entt::null;
 
 	void Update() override
 	{
-		auto &transform = GetComponent<Transform>();
-
-		if (transform.Rotation >= 360)
+		if (InputManager::Get().WasKeyPressed(GLFW_KEY_SPACE))
 		{
-			transform.Rotation = 0;
-		}
-		else
-		{
-			// ? 45 градусов в секунду
-			transform.Rotation += 45.0f * utils::Time::DeltaTime();
+			if (targetEntity != entt::null && registry)
+			{
+				Object target(*registry, targetEntity);
+				if (target.IsActive())
+				{
+					target.SetActive(false);
+				}
+				else
+				{
+					target.SetActive(true);
+				}
+			}
 		}
 	}
 };

@@ -1,6 +1,12 @@
 #pragma once
+#include <string>
 
 #include <engine/engineapi.hpp>
+
+// #include <GL/gl.h>
+#include <iostream>
+#include <memory>
+#include <unordered_map>
 
 struct Texture2D;
 

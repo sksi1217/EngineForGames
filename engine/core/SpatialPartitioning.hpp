@@ -1,6 +1,17 @@
 #pragma once
 
-#include <engine/engineapi.hpp>
+// #include <engine/engineapi.hpp>
+#include <iostream>
+
+#include <engine/core/SpatialPartitioning.hpp>
+
+#include <engine/core/ecs/ECS.hpp>
+
+#include <extern/entt/entt.hpp>
+#include <unordered_map>
+#include <vector>
+
+#include <engine/core/ecs/components/CoreComponents.hpp>
 
 class SpatialPartitioning
 {

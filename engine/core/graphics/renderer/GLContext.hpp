@@ -1,6 +1,7 @@
 #pragma once
+#include <GLFW/glfw3.h>
 
-#include <engine/engineapi.hpp>
+#include <engine/core/utils/Logger.hpp>
 
 class GLContext
 {

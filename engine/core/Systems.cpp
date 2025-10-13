@@ -48,6 +48,20 @@ void RenderSystem::Update()
 
 	for (auto entity : view)
 	{
+		if (!registry.all_of<ActiveComponent>(entity))
+		{
+			// Если компонента нет — считаем объект активным (как в Unity)
+			// ИЛИ пропускаем, если ваша логика требует обязательного наличия компонента
+			// Здесь — считаем активным по умолчанию
+			// → не пропускаем, продолжаем рендер
+		}
+		else
+		{
+			const auto &active = registry.get<ActiveComponent>(entity);
+			if (!active.isActive)
+				continue;
+		}
+
 		const auto &transform = registry.get<Transform>(entity);
 
 		if (!renderer.IsVisible(transform))

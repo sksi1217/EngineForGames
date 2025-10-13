@@ -11,11 +11,11 @@ Shader::~Shader()
 	}
 }
 
-bool Shader::loadFromFile(const std::string &vertexPath, const std::string &fragmentPath)
+bool Shader::LoadFromFile(const std::string &vertexPath, const std::string &fragmentPath)
 {
 	// ! Загрузка исходного кода шейдеров
-	std::string vertexSource = loadShaderSource(vertexPath);
-	std::string fragmentSource = loadShaderSource(fragmentPath);
+	std::string vertexSource = LoadShaderSource(vertexPath);
+	std::string fragmentSource = LoadShaderSource(fragmentPath);
 
 	if (vertexSource.empty() || fragmentSource.empty())
 	{
@@ -24,8 +24,8 @@ bool Shader::loadFromFile(const std::string &vertexPath, const std::string &frag
 	}
 
 	// ! Компиляция шейдеров
-	GLuint vertexShader = compileShader(GL_VERTEX_SHADER, vertexSource);
-	GLuint fragmentShader = compileShader(GL_FRAGMENT_SHADER, fragmentSource);
+	GLuint vertexShader = CompileShader(GL_VERTEX_SHADER, vertexSource);
+	GLuint fragmentShader = CompileShader(GL_FRAGMENT_SHADER, fragmentSource);
 
 	if (vertexShader == 0 || fragmentShader == 0)
 	{
@@ -58,7 +58,7 @@ bool Shader::loadFromFile(const std::string &vertexPath, const std::string &frag
 	return true;
 }
 
-GLuint Shader::compileShader(GLenum type, const std::string &source)
+GLuint Shader::CompileShader(GLenum type, const std::string &source)
 {
 	GLuint shader = glCreateShader(type);
 	if (shader == 0)
@@ -90,7 +90,7 @@ GLuint Shader::compileShader(GLenum type, const std::string &source)
 	return shader;
 }
 
-std::string Shader::loadShaderSource(const std::string &filePath)
+std::string Shader::LoadShaderSource(const std::string &filePath)
 {
 	std::ifstream file(filePath);
 	if (!file.is_open())

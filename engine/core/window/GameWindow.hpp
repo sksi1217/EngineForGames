@@ -1,8 +1,12 @@
 #pragma once
 
-#include <engine/engineapi.hpp>
+// #include <engine/engineapi.hpp>
 
 // #include <engine/core/ui/Settings.hpp>
+
+#include <engine/core/utils/Logger.hpp>
+
+#include <GLFW/glfw3.h>
 
 class GameWindow
 {

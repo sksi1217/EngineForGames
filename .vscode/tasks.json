@@ -4,14 +4,17 @@
     {
       "label": "Build with Makefile",
       "type": "shell",
-      "command": "make -j4",
-      "args": [],
+      "command": "make",
+      "args": ["-j4"],
       "group": {
         "kind": "build",
         "isDefault": true
       },
       "problemMatcher": ["$gcc"],
-      "detail": "Running make to build the project"
+      "detail": "Running make to build the project",
+      "options": {
+        "cwd": "${workspaceFolder}/build"
+      }
     }
   ]
 }

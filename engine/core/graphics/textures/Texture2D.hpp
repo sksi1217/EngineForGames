@@ -1,5 +1,5 @@
 #pragma once
-
+/*
 #include <GL/glew.h>
 
 typedef struct Texture2D
@@ -13,3 +13,4 @@ typedef struct Texture2D
 		glBindTexture(GL_TEXTURE_2D, id);
 	}
 } Texture2D;
+*/

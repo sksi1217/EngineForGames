@@ -1,6 +1,19 @@
 #pragma once
 #include <engine/engineapi.hpp>
 
+#include <engine/core/ecs/components/CoreComponents.hpp>
+#include <engine/core/ecs/components/PhysicsComponents.hpp>
+
+#include <extern/entt/entt.hpp>
+
+#include <engine/core/scene/Object.hpp>
+
+#include <engine/core/graphics/renderer/Renderer.hpp>
+
+#include <engine/core/SpatialPartitioning.hpp>
+
+#include <engine/core/ecs/ECS.hpp>
+
 class CameraSystem
 {
 public:

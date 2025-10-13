@@ -1,11 +1,20 @@
 #pragma once
 
-#include <engine/engineapi.hpp>
+// #include <engine/engineapi.hpp>
 
-// #include <engine/core/SpatialPartitioning.hpp>
+// #include <GL/glx.h>
 
-// #include <engine/core/graphics/shaders/ShaderManager.hpp>
-#include <engine/core/ecs/components/Transform.hpp>
+#define GLEW_STATIC
+#include <GL/glew.h>
+#include <glm/glm.hpp>
+
+#include <engine/core/SpatialPartitioning.hpp>
+
+#include <engine/core/graphics/shaders/ShaderManager.hpp>
+#include <engine/core/ecs/components/CoreComponents.hpp>
+
+#include <engine/core/graphics/shaders/Shader.hpp>
+//
 
 struct Texture2D;
 struct RenderParams;

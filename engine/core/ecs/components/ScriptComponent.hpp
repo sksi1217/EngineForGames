@@ -1,5 +1,9 @@
 #pragma once
-#include <engine/engineapi.hpp>
+
+#include <engine/core/ecs/components/CoreComponents.hpp>
+#include <engine/core/utils/Logger.hpp>
+
+#include <extern/entt/entt.hpp>
 
 struct ScriptComponent
 {
@@ -10,8 +14,11 @@ public:
 	entt::entity entity = entt::null;
 	entt::registry *registry = nullptr;
 
+	Object gameObject();
+
 	virtual ~ScriptComponent() = default;
 
+	virtual void Awake() {}
 	virtual void Start() {}
 	virtual void Update() {}
 	virtual void FixedUpdate() {}
@@ -74,4 +81,20 @@ public:
 	// ! Получения компонента
 	template <typename T>
 	T &GetComponent() { return registry->get<T>(entity); }
+
+	//
+	Transform &transform()
+	{
+		return GetComponent<Transform>();
+	}
+
+	std::string &name()
+	{
+		return GetComponent<NameComponent>().name;
+	}
+
+	std::string &tag()
+	{
+		return GetComponent<TagComponent>().tag;
+	}
 };

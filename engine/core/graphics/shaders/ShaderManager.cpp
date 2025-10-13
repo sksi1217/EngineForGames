@@ -1,5 +1,6 @@
 #include <engine/core/graphics/shaders/ShaderManager.hpp>
 #include <filesystem>
+#include <engine/core/utils/Logger.hpp>
 
 // ! == для ShaderKey
 bool ShaderManager::ShaderKey::operator==(const ShaderKey &other) const
@@ -53,7 +54,7 @@ std::shared_ptr<Shader> ShaderManager::LoadShader(const std::string &vertexPath,
 	}
 
 	auto shader = std::make_shared<Shader>();
-	if (!shader->loadFromFile(vertexPath, fragmentPath))
+	if (!shader->LoadFromFile(vertexPath, fragmentPath))
 	{
 		utils::Logger::error("Failed to compile shader");
 		std::cerr << "Failed to compile shader.\n";

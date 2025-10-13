@@ -1,5 +1,6 @@
 #pragma once
 
+/*
 #include <glm/glm.hpp>
 
 typedef struct RenderParams
@@ -15,3 +16,4 @@ typedef struct RenderParams
 	bool FlipX = false;						 //
 	bool FlipY = false;						 //
 } RenderParams;
+*/

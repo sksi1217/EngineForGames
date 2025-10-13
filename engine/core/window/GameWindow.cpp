@@ -1,4 +1,5 @@
 #include <engine/core/window/GameWindow.hpp>
+#include <extern/stb/stb_image.h>
 
 // ! Начальные методы
 #pragma region Начальные методы

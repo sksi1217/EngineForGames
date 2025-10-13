@@ -1,33 +1,25 @@
 #pragma once
-// #include <engine/core/components/Components.hpp>
 
-#include <engine/engineapi.hpp>
+#include <engine/core/ecs/components/CoreComponents.hpp>
 
 #include <engine/core/utils/Time.hpp>
 #include <engine/core/utils/Logger.hpp>
-#include <engine/core/scene/GameObject.hpp>
-#include <engine/core/events/InputManager.hpp>
-// #include <engine/core/ecs/components/SpriteRenderer.hpp>
 
 class ExampleScript : public ScriptComponent
 {
 private:
-	glm::vec2 velocity;
-	glm::vec2 screenBounds; // Границы экрана
+	Sprite *render = nullptr;
 
 public:
 	void Start() override
 	{
-		utils::Logger::info("Start");
+		utils::Logger::info("Start Object: " + name());
 
-		velocity = glm::vec2(0.0f, 0.0f);
-		screenBounds = glm::vec2(800.0f, 600.0f);
+		render = &GetComponent<Sprite>();
 	}
 
 	void Update() override
 	{
-		auto &transform = GetComponent<Transform>();
-		auto &render = GetComponent<Sprite>();
 
 		float moveSpeed = 200.0f; // Пикселей в секунду
 		glm::vec2 movement(0.0f, 0.0f);
@@ -43,24 +35,26 @@ public:
 			movement.x += moveSpeed;
 
 		// Применяем движение
-		transform.Position += movement * utils::Time::DeltaTime();
+		transform().Position += movement * utils::Time::DeltaTime();
 
 		// Переключение слоя рендера при нажатии пробела
 		if (InputManager::Get().WasKeyPressed(GLFW_KEY_SPACE))
 		{
-			render.OrderLayer = -render.OrderLayer;
-		}
 
-		/*
-		// Ограничения движения внутри окна
-		if (transform.Position.x() < 0)
-			transform.Position.x() = 0;
-		if (transform.Position.y() < 0)
-			transform.Position.y() = 0;
-		if (transform.Position.x() + transform.Scale.x > screenBounds.x)
-			transform.Position.x() = screenBounds.x - transform.Scale.x;
-		if (transform.Position.y() + transform.Scale.y > screenBounds.y)
-			transform.Position.y() = screenBounds.y - transform.Scale.y;
-		*/
+			if (render->OrderLayer == 0)
+			{
+				render->OrderLayer = -1;
+			}
+			else if (render->OrderLayer == -1)
+			{
+				render->OrderLayer = 1;
+			}
+			else if (render->OrderLayer == 1)
+			{
+				render->OrderLayer = -1;
+			}
+
+			utils::Logger::info("OrderLayer: " + std::to_string(static_cast<int>(render->OrderLayer)));
+		}
 	}
 };

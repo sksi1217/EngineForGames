@@ -1,6 +1,9 @@
 #pragma once
 
-#include <engine/engineapi.hpp>
+// #include <engine/engineapi.hpp>
+
+#include <random>
+#include <thread>
 
 // ** imgui
 #include <extern/imgui/imgui.h>
@@ -10,6 +13,21 @@
 
 #include <engine/core/Systems.hpp>
 #include <engine/core/ui/ImGuiContext.hpp>
+#include <engine/core/graphics/renderer/GLContext.hpp>
+
+#include <engine/core/ecs/components/PhysicsComponents.hpp>
+
+#include <engine/core/ecs/ECS.hpp>
+
+#include <engine/core/events/EventSystem.hpp>
+
+#include <engine/core/SpatialPartitioning.hpp>
+
+#include <engine/core/window/GameWindow.hpp>
+
+#include <engine/core/graphics/textures/TextureLoader.hpp>
+
+#include <engine/core/events/InputManager.hpp>
 
 // #include <engine/core/ui/Settings.hpp>
 

@@ -1,6 +1,8 @@
+/*
 #include <engine/core/ui/Settings.hpp>
 #include <fstream>
 #include <extern/nlohmann/json.hpp>
+#include <engine/core/utils/Logger.hpp>
 
 using json = nlohmann::json;
 
@@ -188,3 +190,4 @@ void Settings::Save()
 		utils::Logger::error("Unknown error while saving settings");
 	}
 }
+*/
