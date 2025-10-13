@@ -1,9 +1,11 @@
 #pragma once
-#include <engine/engineapi.hpp>
+#include <engine/LightEngine.hpp>
 
 #include <engine/core/ecs/components/CoreComponents.hpp>
 #include <engine/core/ecs/components/PhysicsComponents.hpp>
 
+#include <engine/core/utils/Time.hpp>
+#include <engine/core/utils/Destruction.hpp>
 #include <extern/entt/entt.hpp>
 
 #include <engine/core/scene/Object.hpp>
@@ -34,6 +36,7 @@ public:
 
 class CollisionSystem
 {
+	/*
 public:
 	void Update(SpatialPartitioning &spatialPartitioning);
 
@@ -42,6 +45,7 @@ private:
 
 	bool CheckAABB(const BoxCollider2D &a, const Transform &ta, const BoxCollider2D &b, const Transform &tb);
 	void HandleCollision(entt::entity a, entt::entity b);
+	*/
 };
 
 class ScriptSystem
@@ -49,4 +53,10 @@ class ScriptSystem
 public:
 	void Update();
 	void FixedUpdate();
+};
+
+class DestroySystem
+{
+public:
+	static void Update();
 };

@@ -26,6 +26,7 @@ set(SOURCES
     engine/core/Systems.cpp
     engine/core/ecs/components/ScriptComponent.cpp
     engine/core/utils/Time.cpp
+    engine/core/utils/Destruction.cpp
     engine/core/ui/Settings.cpp
     engine/core/graphics/renderer/Renderer.cpp
     engine/core/graphics/shaders/Shader.cpp

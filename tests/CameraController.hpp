@@ -1,6 +1,6 @@
 #pragma once
 
-#include <engine/engineapi.hpp>
+#include <engine/LightEngine.hpp>
 
 #include <engine/core/ecs/components/ScriptComponent.hpp>
 

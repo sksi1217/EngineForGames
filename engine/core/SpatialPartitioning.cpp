@@ -1,3 +1,5 @@
+
+/*
 #include <engine/core/SpatialPartitioning.hpp>
 #include <iomanip>
 
@@ -286,3 +288,4 @@ void SpatialPartitioning::DrawDebug()
 	std::cout << "\033[31mRed\033[0m: 6+ objects\n";
 	std::cout << "Empty: 0 objects\n\n";
 }
+*/

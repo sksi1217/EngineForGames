@@ -220,6 +220,7 @@ void Renderer::EndBatch()
 
 #pragma region Рисования
 
+/*
 void Renderer::DrawDebugGrid(SpatialPartitioning &grid, const glm::vec4 &color)
 {
 	int cellSize = grid.GetCellSize();
@@ -239,6 +240,7 @@ void Renderer::DrawDebugGrid(SpatialPartitioning &grid, const glm::vec4 &color)
 		}
 	}
 }
+	*/
 
 void Renderer::DrawRectOutline(const glm::vec2 &position, const glm::vec2 &size, const glm::vec4 &color)
 {

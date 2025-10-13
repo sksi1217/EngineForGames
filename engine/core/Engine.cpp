@@ -49,7 +49,7 @@ void Engine::Initialize()
 
 	// ! Инициализация ImGui
 	ImGuiContext::Init(m_Window->GetWindowGLFW());
-	spatialPartitioning = new SpatialPartitioning(2000, 1000);
+	// spatialPartitioning = new SpatialPartitioning(2000, 1000);
 
 	auto &registry = ECS::Get().GetRegistry();
 
@@ -79,7 +79,7 @@ void Engine::Initialize()
 	entity.AddScript<ExampleScript>();
 	entity.AddScript<Script>();
 
-	spatialPartitioning->AddObject(entity.entity, {transform.Position.x(), transform.Position.y()});
+	// spatialPartitioning->AddObject(entity.entity, {transform.Position.x(), transform.Position.y()});
 
 	Object entity1 = Object::CreateObject(registry);
 	auto &transform1 = entity1.GetComponent<Transform>();
@@ -89,7 +89,7 @@ void Engine::Initialize()
 
 	entity.GetScript<Script>().targetEntity = entity1.entity;
 
-	spatialPartitioning->AddObject(entity1.entity, {transform1.Position.x(), transform1.Position.y()});
+	// spatialPartitioning->AddObject(entity1.entity, {transform1.Position.x(), transform1.Position.y()});
 }
 
 void Engine::Run()
@@ -123,26 +123,17 @@ void Engine::Run()
 
 void Engine::Update()
 {
-	static int framesSinceLastUpdate = 0;
-	framesSinceLastUpdate++;
-
-	// Пересчитываем размер сетки каждые 60 кадров (1 раз в секунду)
-	if (framesSinceLastUpdate >= 10)
-	{
-		spatialPartitioning->UpdateCellSizeBasedOnObjects();
-		framesSinceLastUpdate = 0;
-	}
-
 	// Сначала обновляем физику и коллизии
-	collisionSystem.Update(*spatialPartitioning);
+	// collisionSystem.Update(*spatialPartitioning);
 
 	// Затем обновляем позиции и проверяем изменения
 	movementSystem.Update(*spatialPartitioning);
-
+	DestroySystem::Update();
 	// Потом скрипты
 	scriptSystem.Update();
 	scriptSystem.FixedUpdate();
 
+	// destroySystem.Update();
 	// И в конце рендер
 	renderSystem.Update();
 }

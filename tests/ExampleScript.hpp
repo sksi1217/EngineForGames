@@ -1,5 +1,5 @@
 #pragma once
-
+#include <engine/core/utils/Destruction.hpp>
 #include <engine/core/ecs/components/CoreComponents.hpp>
 
 #include <engine/core/utils/Time.hpp>
@@ -55,6 +55,13 @@ public:
 			}
 
 			utils::Logger::info("OrderLayer: " + std::to_string(static_cast<int>(render->OrderLayer)));
+		}
+
+		if (InputManager::Get().WasKeyPressed(GLFW_KEY_F))
+		{
+			utils::Logger::info("Start destroy the Object!");
+			// Уничтожить себя через 5 секунд
+			Destroy(gameObject(), 5.0f);
 		}
 	}
 };

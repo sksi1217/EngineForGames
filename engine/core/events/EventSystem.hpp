@@ -4,7 +4,7 @@
 #include <extern/imgui/backends/imgui_impl_glfw.h>
 #include <functional>
 #include <engine/core/utils/Logger.hpp>
-#include <engine/engineapi.hpp>
+#include <engine/LightEngine.hpp>
 #include <engine/core/graphics/renderer/Renderer.hpp>
 
 #include <GLFW/glfw3.h>

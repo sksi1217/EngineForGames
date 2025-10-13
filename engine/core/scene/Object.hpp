@@ -196,6 +196,8 @@ public:
 		throw std::runtime_error("Script not found");
 	}
 
+	entt::registry &GetRegistry() const { return *registry; }
+
 private:
 	entt::registry *registry;
 };

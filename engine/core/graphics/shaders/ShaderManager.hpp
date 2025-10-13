@@ -4,7 +4,7 @@
 #include <unordered_map>
 #include <memory>
 
-#include <engine/engineapi.hpp>
+#include <engine/LightEngine.hpp>
 
 #include <engine/core/graphics/shaders/Shader.hpp>
 

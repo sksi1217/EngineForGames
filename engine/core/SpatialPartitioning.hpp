@@ -1,5 +1,7 @@
-#pragma once
 
+
+#pragma once
+/*
 // #include <engine/engineapi.hpp>
 #include <iostream>
 
@@ -68,3 +70,4 @@ private:
 
 	GridPos PositionToGridPos(const glm::vec2 &position) const;
 };
+*/

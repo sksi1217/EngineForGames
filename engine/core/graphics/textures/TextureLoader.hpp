@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 
-#include <engine/engineapi.hpp>
+#include <engine/LightEngine.hpp>
 
 // #include <GL/gl.h>
 #include <iostream>
