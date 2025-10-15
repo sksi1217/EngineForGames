@@ -62,7 +62,7 @@ void Engine::Initialize()
 
 	// ? Временное решение
 	// ! Загружаем текстуры
-	auto texture = TextureLoader::loadTexture("assets/textures/texture.png");
+	auto texture = TextureLoader::LoadTexture("assets/textures/texture.png");
 
 	if (!texture)
 	{
@@ -77,7 +77,6 @@ void Engine::Initialize()
 	transform.Scale = {100, 100};
 	entity.AddComponent<Sprite>(texture.get());
 	entity.AddScript<ExampleScript>();
-	entity.AddScript<Script>();
 
 	// spatialPartitioning->AddObject(entity.entity, {transform.Position.x(), transform.Position.y()});
 
@@ -86,8 +85,9 @@ void Engine::Initialize()
 	transform1.Position = {100, 100};
 	transform1.Scale = {100, 100};
 	entity1.AddComponent<Sprite>(texture.get());
+	entity1.AddScript<Script>();
 
-	entity.GetScript<Script>().targetEntity = entity1.entity;
+	entity.GetScript<ExampleScript>().targetEntity = entity1.entity;
 
 	// spatialPartitioning->AddObject(entity1.entity, {transform1.Position.x(), transform1.Position.y()});
 }

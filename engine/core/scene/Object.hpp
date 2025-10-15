@@ -75,15 +75,15 @@ public:
 		ac.isActive = active;
 
 		// Вызываем OnEnable / OnDisable у скриптов
-		if (registry->any_of<ScriptsContainerComponent>(entity))
+		if (HasComponent<ScriptsContainerComponent>())
 		{
 			auto &scripts = registry->get<ScriptsContainerComponent>(entity);
 			for (auto &script : scripts.scripts)
 			{
 				if (active)
-					script->OnEnable();
+					script->Enable();
 				else
-					script->OnDisable();
+					script->Disable();
 			}
 		}
 	}

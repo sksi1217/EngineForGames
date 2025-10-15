@@ -9,24 +9,16 @@ class Script : public ScriptComponent
 {
 private:
 public:
-	entt::entity targetEntity = entt::null;
-
-	void Update() override
+	void OnEnable() override
 	{
-		if (InputManager::Get().WasKeyPressed(GLFW_KEY_SPACE))
-		{
-			if (targetEntity != entt::null && registry)
-			{
-				Object target(*registry, targetEntity);
-				if (target.IsActive())
-				{
-					target.SetActive(false);
-				}
-				else
-				{
-					target.SetActive(true);
-				}
-			}
-		}
+		utils::Logger::info("OnEnable");
+	}
+	void OnDisable() override
+	{
+		utils::Logger::info("OnDisable");
+	}
+	void OnDestroy() override
+	{
+		utils::Logger::info("OnDestroy");
 	}
 };

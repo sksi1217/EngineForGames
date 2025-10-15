@@ -4,13 +4,10 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <extern/stb/stb_image.h>
 
-
-
-
 // Инициализация статического кэша
 std::unordered_map<std::string, std::shared_ptr<Texture2D>> TextureLoader::textureCache;
 
-std::shared_ptr<Texture2D> TextureLoader::loadTexture(const std::string &filePath)
+std::shared_ptr<Texture2D> TextureLoader::LoadTexture(const std::string &filePath)
 {
 	// Проверяем, есть ли текстура в кэше
 	auto it = textureCache.find(filePath);
@@ -22,7 +19,7 @@ std::shared_ptr<Texture2D> TextureLoader::loadTexture(const std::string &filePat
 
 	// Создаем новую текстуру
 	auto texture = std::make_unique<Texture2D>();
-	if (!createTexture(filePath, *texture))
+	if (!CreateTexture(filePath, *texture))
 	{
 		std::cerr << "Failed to load texture: " << filePath << std::endl;
 		return nullptr;
@@ -33,7 +30,7 @@ std::shared_ptr<Texture2D> TextureLoader::loadTexture(const std::string &filePat
 	return textureCache[filePath];
 }
 
-bool TextureLoader::createTexture(const std::string &filePath, Texture2D &texture)
+bool TextureLoader::CreateTexture(const std::string &filePath, Texture2D &texture)
 {
 	int width, height, channels;
 	unsigned char *data = stbi_load(filePath.c_str(), &width, &height, &channels, 0);
@@ -71,7 +68,7 @@ bool TextureLoader::createTexture(const std::string &filePath, Texture2D &textur
 	return true;
 }
 
-void TextureLoader::clearCache()
+void TextureLoader::ClearCache()
 {
 	textureCache.clear();
 }

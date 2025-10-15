@@ -11,6 +11,8 @@ private:
 	Sprite *render = nullptr;
 
 public:
+	entt::entity targetEntity = entt::null;
+
 	void Start() override
 	{
 		utils::Logger::info("Start Object: " + name());
@@ -40,28 +42,31 @@ public:
 		// Переключение слоя рендера при нажатии пробела
 		if (InputManager::Get().WasKeyPressed(GLFW_KEY_SPACE))
 		{
+			if (targetEntity != entt::null && registry)
+			{
+				Object target(*registry, targetEntity);
+				if (target.IsActive())
+				{
+					target.SetActive(false);
+				}
+				else
+				{
+					target.SetActive(true);
+				}
 
-			if (render->OrderLayer == 0)
-			{
-				render->OrderLayer = -1;
+				utils::Logger::info("IsActive");
 			}
-			else if (render->OrderLayer == -1)
-			{
-				render->OrderLayer = 1;
-			}
-			else if (render->OrderLayer == 1)
-			{
-				render->OrderLayer = -1;
-			}
-
-			utils::Logger::info("OrderLayer: " + std::to_string(static_cast<int>(render->OrderLayer)));
 		}
 
 		if (InputManager::Get().WasKeyPressed(GLFW_KEY_F))
 		{
 			utils::Logger::info("Start destroy the Object!");
-			// Уничтожить себя через 5 секунд
-			Destroy(gameObject(), 5.0f);
+			if (targetEntity != entt::null && registry)
+			{
+				Object target(*registry, targetEntity);
+
+				Destroy(target);
+			}
 		}
 	}
 };
