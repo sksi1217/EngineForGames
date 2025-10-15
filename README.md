@@ -170,6 +170,7 @@ entity.GetScript<Script>().targetEntity = entity1.entity;
 https://github.com/user-attachments/assets/ef66ad5e-4370-4a1b-85d9-58411e938eb1
 
 
+<<<<<<< HEAD
 
 
 # Загрузка текстур
@@ -178,6 +179,14 @@ https://github.com/user-attachments/assets/ef66ad5e-4370-4a1b-85d9-58411e938eb1
 
 ```cpp
 auto tex = TextureLoader::loadTexture("assets/textures/ship.png");
+=======
+# Загрузка текстур
+
+Чтобы загрузить текстуру, нужно подключить файл `#include <engine/core/graphics/textures/TextureLoader.hpp>`:
+
+```cpp
+auto tex = TextureLoader::LoadTexture("assets/textures/ship.png");
+>>>>>>> 2999f3994dd9e9ff48ed15488858f71ae1b793c9
 ```
 
 Функция возвращает nullptr, если файл не найден.
