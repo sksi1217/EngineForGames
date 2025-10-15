@@ -169,3 +169,13 @@ entity.GetScript<Script>().targetEntity = entity1.entity;
 
 https://github.com/user-attachments/assets/ef66ad5e-4370-4a1b-85d9-58411e938eb1
 
+
+# Загрузка текстур
+
+Чтобы загрузить текстуру, нужно подключить файл `#include <engine/core/graphics/textures/TextureLoader.hpp>`:
+
+```cpp
+auto tex = TextureLoader::LoadTexture("assets/textures/ship.png");
+```
+
+Функция возвращает nullptr, если файл не найден.
