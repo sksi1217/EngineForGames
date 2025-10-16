@@ -8,8 +8,6 @@
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 
-#include <engine/core/SpatialPartitioning.hpp>
-
 #include <engine/core/graphics/shaders/ShaderManager.hpp>
 #include <engine/core/ecs/components/CoreComponents.hpp>
 

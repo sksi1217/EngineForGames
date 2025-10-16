@@ -21,8 +21,6 @@
 
 #include <engine/core/events/EventSystem.hpp>
 
-#include <engine/core/SpatialPartitioning.hpp>
-
 #include <engine/core/window/GameWindow.hpp>
 
 #include <engine/core/graphics/textures/TextureLoader.hpp>
@@ -45,13 +43,11 @@ private:
 	EngineState m_State;
 	EventSystem events;
 
-	SpatialPartitioning *spatialPartitioning;
-
 	// Системы
-	RenderSystem renderSystem;
-	MovementSystem movementSystem;
-	CollisionSystem collisionSystem;
-	ScriptSystem scriptSystem;
+	le::RenderSystem renderSystem;
+	le::MovementSystem movementSystem;
+	le::ScriptSystem scriptSystem;
+	le::PhysicsSystem m_physicsSystem{1000.0f, 1000.0f, 200.0f}; // ширина, высота мира
 
 	void Initialize();
 	void Update();

@@ -3,6 +3,7 @@
 #include <tests/ExampleScript.hpp>
 #include <tests/Script.hpp>
 #include <tests/CameraController.hpp>
+#include <engine/core/ecs/components/PhysicsComponents.hpp>
 
 Engine::Engine()
 {
@@ -73,23 +74,26 @@ void Engine::Initialize()
 
 	Object entity = Object::CreateObject(registry);
 	auto &transform = entity.GetComponent<Transform>();
-	transform.Position = {100, 100};
+	transform.Position = {100, 200};
 	transform.Scale = {100, 100};
 	entity.AddComponent<Sprite>(texture.get());
+	entity.AddComponent<le::Rigidbody2D>();
+	entity.AddComponent<le::BoxCollider2D>();
+	entity.GetComponent<le::BoxCollider2D>().size = {100, 100};
 	entity.AddScript<ExampleScript>();
-
-	// spatialPartitioning->AddObject(entity.entity, {transform.Position.x(), transform.Position.y()});
 
 	Object entity1 = Object::CreateObject(registry);
 	auto &transform1 = entity1.GetComponent<Transform>();
-	transform1.Position = {100, 100};
+	transform1.Position = {600, 200};
 	transform1.Scale = {100, 100};
 	entity1.AddComponent<Sprite>(texture.get());
+	entity1.AddComponent<le::Rigidbody2D>();
+
+	// entity1.GetComponent<le::Rigidbody2D>().SetMass(40);
+	entity1.AddComponent<le::BoxCollider2D>();
+	entity1.GetComponent<le::BoxCollider2D>().size = {100, 100};
 	entity1.AddScript<Script>();
-
 	entity.GetScript<ExampleScript>().targetEntity = entity1.entity;
-
-	// spatialPartitioning->AddObject(entity1.entity, {transform1.Position.x(), transform1.Position.y()});
 }
 
 void Engine::Run()
@@ -97,7 +101,7 @@ void Engine::Run()
 	while (!m_Window->ShouldClose() && m_State.isRunning)
 	{
 		// ! Очистка экрана
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		if (m_Window->IsFocused())
@@ -124,25 +128,17 @@ void Engine::Run()
 void Engine::Update()
 {
 	// Сначала обновляем физику и коллизии
-	// collisionSystem.Update(*spatialPartitioning);
+	m_physicsSystem.Update(ECS::Get().GetRegistry(), utils::Time::DeltaTime());
 
 	// Затем обновляем позиции и проверяем изменения
-	movementSystem.Update(*spatialPartitioning);
-	DestroySystem::Update();
+	le::DestroySystem::Update();
 	// Потом скрипты
 	scriptSystem.Update();
 	scriptSystem.FixedUpdate();
-
-	// destroySystem.Update();
-	// И в конце рендер
-	renderSystem.Update();
 }
 
 void Engine::Draw()
 {
-	if (!spatialPartitioning)
-		return;
-
 	Renderer::Get().BeginBatch();
 
 	// ! Выводим в консоль сколько объектов в spatialPartitioning

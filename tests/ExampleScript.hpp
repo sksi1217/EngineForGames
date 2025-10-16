@@ -1,7 +1,6 @@
 #pragma once
 #include <engine/core/utils/Destruction.hpp>
 #include <engine/core/ecs/components/CoreComponents.hpp>
-
 #include <engine/core/utils/Time.hpp>
 #include <engine/core/utils/Logger.hpp>
 
@@ -16,17 +15,24 @@ public:
 	void Start() override
 	{
 		utils::Logger::info("Start Object: " + name());
-
 		render = &GetComponent<Sprite>();
 	}
 
 	void Update() override
 	{
+		// Получаем компонент физики
+		auto &rb = GetComponent<le::Rigidbody2D>();
+
+		// Если тело кинематическое или статическое — не управляем
+		if (rb.isKinematic || rb.isStatic)
+		{
+			// Но если хочешь управлять кинематикой — см. примечание ниже
+			return;
+		}
 
 		float moveSpeed = 200.0f; // Пикселей в секунду
 		glm::vec2 movement(0.0f, 0.0f);
 
-		// Управление с клавиатуры
 		if (InputManager::Get().IsKeyPressed(GLFW_KEY_W))
 			movement.y -= moveSpeed;
 		if (InputManager::Get().IsKeyPressed(GLFW_KEY_S))
@@ -36,25 +42,23 @@ public:
 		if (InputManager::Get().IsKeyPressed(GLFW_KEY_D))
 			movement.x += moveSpeed;
 
-		// Применяем движение
-		transform().Position += movement * utils::Time::DeltaTime();
+		float maxSpeed = 500.0f; // пикселей/сек
+		if (glm::length(rb.velocity) > maxSpeed)
+		{
+			rb.velocity = glm::normalize(rb.velocity) * maxSpeed;
+		}
 
-		// Переключение слоя рендера при нажатии пробела
+		// Альтернатива: прикладывать силу (для плавного ускорения)
+		rb.acceleration += movement * rb.mass; // если используешь F = ma
+
+		// Управление активностью и уничтожением — без изменений
 		if (InputManager::Get().WasKeyPressed(GLFW_KEY_SPACE))
 		{
 			if (targetEntity != entt::null && registry)
 			{
 				Object target(*registry, targetEntity);
-				if (target.IsActive())
-				{
-					target.SetActive(false);
-				}
-				else
-				{
-					target.SetActive(true);
-				}
-
-				utils::Logger::info("IsActive");
+				target.SetActive(!target.IsActive());
+				utils::Logger::info("IsActive toggled");
 			}
 		}
 
@@ -64,7 +68,6 @@ public:
 			if (targetEntity != entt::null && registry)
 			{
 				Object target(*registry, targetEntity);
-
 				Destroy(target);
 			}
 		}

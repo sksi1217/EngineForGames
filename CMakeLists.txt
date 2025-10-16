@@ -19,11 +19,12 @@ endif()
 set(SOURCES
     tests/main.cpp
     engine/core/Engine.cpp
-    engine/core/SpatialPartitioning.cpp
     engine/core/events/EventSystem.cpp
     engine/core/window/GameWindow.cpp
     engine/core/utils/Logger.cpp
     engine/core/Systems.cpp
+    engine/core/physics/CollisionDetection.cpp
+    engine/core/physics/CollisionResolution.cpp
     engine/core/ecs/components/ScriptComponent.cpp
     engine/core/utils/Time.cpp
     engine/core/utils/Destruction.cpp
