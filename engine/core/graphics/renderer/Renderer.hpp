@@ -6,12 +6,14 @@
 
 #define GLEW_STATIC
 #include <GL/glew.h>
-#include <glm/glm.hpp>
 
 #include <engine/core/graphics/shaders/ShaderManager.hpp>
 #include <engine/core/ecs/components/CoreComponents.hpp>
 
+#include <functional>
+
 #include <engine/core/graphics/shaders/Shader.hpp>
+
 //
 
 struct Texture2D;
@@ -33,6 +35,9 @@ public:
 	~Renderer();
 
 	void RenderSprite(const Texture2D &texture, const RenderParams &params);
+
+	void DrawDebugLine(const glm::vec2 &p0, const glm::vec2 &p1, const glm::vec3 &color = glm::vec3(1.0f, 0.0f, 0.0f));
+	void DrawDebugAABB(const glm::vec2 &center, const glm::vec2 &size, const glm::vec3 &color = glm::vec3(1.0f, 0.0f, 0.0f));
 
 	void BeginBatch();
 	void EndBatch();

@@ -26,10 +26,25 @@ public:
 		return (static_cast<size_t>(x) << 16) ^ static_cast<size_t>(y); // объединяем x и y в одно число
 	}
 
-	void InsertGrid(size_t entityIndex, const glm::vec2 &pos)
+	void InsertGrid(size_t entityIndex, const glm::vec2 &center, const glm::vec2 &halfSize)
 	{
-		size_t key = Hash(pos);
-		m_grid[key].entities.push_back(entityIndex);
+		// Находим диапазон ячеек, которые пересекает AABB
+		glm::vec2 minCorner = center - halfSize;
+		glm::vec2 maxCorner = center + halfSize;
+
+		int minX = static_cast<int>(std::floor(minCorner.x / cellSize));
+		int maxX = static_cast<int>(std::floor(maxCorner.x / cellSize));
+		int minY = static_cast<int>(std::floor(minCorner.y / cellSize));
+		int maxY = static_cast<int>(std::floor(maxCorner.y / cellSize));
+
+		for (int x = minX; x <= maxX; ++x)
+		{
+			for (int y = minY; y <= maxY; ++y)
+			{
+				size_t key = (static_cast<size_t>(x) << 16) ^ static_cast<size_t>(y);
+				m_grid[key].entities.push_back(entityIndex);
+			}
+		}
 	}
 
 	void ForEachNear(const glm::vec2 &pos, const std::function<void(size_t)> &callback) const

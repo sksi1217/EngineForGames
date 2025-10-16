@@ -11,14 +11,11 @@ namespace le
 	// ============================================================================
 	struct Rigidbody2D
 	{
+	public:
 		glm::vec2 velocity{0.0f};	  // текущая скорость
 		glm::vec2 acceleration{0.0f}; // текущее ускорение (сумма сил / масса)
-		float mass{1.0f};			  // масса (> 0). Если 0 — тело статическое.
-		float inverseMass{1.0f};	  // кэшированная 1/mass (для оптимизации)
 		float restitution{0.8f};	  // упругость: [0.0 = полностью поглощает, 1.0 = идеальный отскок]
 		float friction{0.5f};		  // трение: [0.0 = лёд, 1.0 = резина]
-		bool isKinematic{false};	  // если true — не реагирует на силы, но может двигаться вручную
-		bool isStatic{false};		  // если true — никогда не двигается (mass = 0)
 
 		// Конструктор для удобства
 		Rigidbody2D(float m = 1.0f, float rest = 0.8f, float fric = 0.5f)
@@ -26,13 +23,59 @@ namespace le
 		{
 		}
 
+		void SetKinematic(bool active)
+		{
+			isKinematic = active;
+
+			if (isKinematic)
+			{
+				SetMass(0);
+			}
+		}
+
+		void SetStatic(bool active)
+		{
+			isStatic = active;
+			/*
+			if (isStatic)
+			{
+				SetMass(0);
+			}
+			*/
+		}
+
 		// Обновление inverseMass при изменении массы (если будешь менять массу во время игры)
 		void SetMass(float m)
 		{
-			mass = m > 0.0f ? m : 0.0f;
-			inverseMass = m > 0.0f ? 1.0f / m : 0.0f;
-			isStatic = (m <= 0.0f);
+			if (!isKinematic || !isStatic)
+			{
+				mass = m > 0.0f ? m : 0.0f;
+				inverseMass = m > 0.0f ? 1.0f / m : 0.0f;
+				isStatic = (m <= 0.0f);
+			}
 		}
+
+		bool GetKinematic()
+		{
+			return isKinematic;
+		}
+
+		bool GetStatic()
+		{
+			return isStatic;
+		}
+
+		float GetMass()
+		{
+			return inverseMass;
+		}
+
+	private:
+		bool isKinematic{false}; // если true — не реагирует на силы, но может двигаться вручную
+		bool isStatic{false};	 // если true — никогда не двигается (mass = 0)
+
+		float mass{1.0f};		 // масса (> 0). Если 0 — тело статическое.
+		float inverseMass{1.0f}; // кэшированная 1/mass (для оптимизации)
 	};
 
 	// ============================================================================

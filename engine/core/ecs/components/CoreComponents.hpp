@@ -1,6 +1,7 @@
 #pragma once
 
-#include <engine/core/ecs/components/Position2D.hpp>
+// #include <engine/core/ecs/components/Position2D.hpp>
+#include <glm/glm.hpp>
 #include <string>
 
 class Object;
@@ -61,21 +62,10 @@ struct Transform
 private:
 	const bool enable = true;
 
-	bool changed = false;
-
-	void OnModify()
-	{
-		changed = true;
-	}
-
 public:
-	Position2D Position{glm::vec2(0.0f, 0.0f), [this]()
-						{ OnModify(); }};
+	glm::vec2 position{0.0f, 0.0f};
 
-	glm::vec2 Scale{50.0f, 50.0f};
-	glm::vec2 Origin{0.0f, 0.0f};
-	float Rotation = 0.0f;
-
-	bool GetChanged() const { return changed; }
-	void SetChanged(bool newChanged) { changed = newChanged; }
+	glm::vec2 scale{50.0f, 50.0f};
+	glm::vec2 origin{0.0f, 0.0f};
+	float rotation = 0.0f;
 };

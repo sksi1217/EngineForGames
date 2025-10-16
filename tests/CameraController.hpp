@@ -16,19 +16,19 @@ public:
 
 		if (InputManager::Get().IsKeyPressed(GLFW_KEY_UP))
 		{
-			transform().Position.y() -= speed;
+			transform().position.y -= speed;
 		}
 		if (InputManager::Get().IsKeyPressed(GLFW_KEY_DOWN))
 		{
-			transform().Position.y() += speed;
+			transform().position.y += speed;
 		}
 		if (InputManager::Get().IsKeyPressed(GLFW_KEY_RIGHT))
 		{
-			transform().Position.x() += speed;
+			transform().position.x += speed;
 		}
 		if (InputManager::Get().IsKeyPressed(GLFW_KEY_LEFT))
 		{
-			transform().Position.x() -= speed;
+			transform().position.x -= speed;
 		}
 	}
 };

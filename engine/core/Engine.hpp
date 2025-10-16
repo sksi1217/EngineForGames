@@ -45,9 +45,9 @@ private:
 
 	// Системы
 	le::RenderSystem renderSystem;
-	le::MovementSystem movementSystem;
 	le::ScriptSystem scriptSystem;
 	le::PhysicsSystem m_physicsSystem{1000.0f, 1000.0f, 200.0f}; // ширина, высота мира
+	le::DebugDrawSystem m_debugDrawSystem;
 
 	void Initialize();
 	void Update();

@@ -22,6 +22,44 @@
 namespace le
 {
 
+	class DebugDrawSystem
+	{
+	public:
+		// Глобальные ресурсы для отладочной отрисовки (инициализируются один раз)
+		GLuint g_debugVao = 0;
+		GLuint g_debugVbo = 0;
+		bool g_initialized = false;
+
+		void InitDebugDraw()
+		{
+			if (g_initialized)
+				return;
+
+			glGenVertexArrays(1, &g_debugVao);
+			glGenBuffers(1, &g_debugVbo);
+
+			glBindVertexArray(g_debugVao);
+			glBindBuffer(GL_ARRAY_BUFFER, g_debugVbo);
+			// Будем передавать данные каждый кадр — динамический буфер
+			glBufferData(GL_ARRAY_BUFFER, 0, nullptr, GL_DYNAMIC_DRAW);
+
+			// layout (location = 0) in vec2 aPos;
+			// layout (location = 1) in vec3 aColor;
+			glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void *)0);
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void *)(sizeof(float) * 2));
+			glEnableVertexAttribArray(1);
+
+			glBindVertexArray(0);
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+			g_initialized = true;
+		}
+
+		// Обновляет отладочную информацию: собирает коллайдеры и отправляет их в DebugRenderer
+		void Update(entt::registry &registry);
+	};
+
 	class CameraSystem
 	{
 	public:
@@ -32,12 +70,6 @@ namespace le
 	{
 	public:
 		void Update();
-	};
-
-	class MovementSystem
-	{
-	public:
-		void Update(SpatialPartitioning &spatialPartitioning);
 	};
 
 	class ScriptSystem

@@ -3,6 +3,98 @@
 namespace le
 {
 
+	void DebugDrawSystem::Update(entt::registry &registry)
+	{
+		InitDebugDraw();
+
+		// Собираем все линии для отрисовки: {x0, y0, r, g, b, x1, y1, r, g, b}
+		std::vector<float> lineVertices;
+
+		auto view = registry.view<Transform, BoxCollider2D>();
+		for (auto entity : view)
+		{
+			const auto &transform = view.get<Transform>(entity);
+			const auto &collider = view.get<BoxCollider2D>(entity);
+
+			glm::vec2 worldPos = transform.position + collider.offset;
+			glm::vec2 halfSize = collider.size * 0.5f;
+
+			// Цвет: красный для динамических, зелёный для кинематических, синий для статических
+			glm::vec3 color = glm::vec3(1.0f, 0.0f, 0.0f); // по умолчанию — динамический
+
+			if (registry.all_of<Rigidbody2D>(entity))
+			{
+				auto &rb = registry.get<Rigidbody2D>(entity);
+				if (rb.GetKinematic())
+					color = glm::vec3(0.0f, 1.0f, 0.0f);
+				else if (rb.GetStatic())
+				{
+					color = glm::vec3(0.0f, 0.0f, 1.0f);
+				}
+			}
+
+			// 4 угла AABB
+			std::array<glm::vec2, 4> corners = {
+				worldPos + glm::vec2(-halfSize.x, -halfSize.y),
+				worldPos + glm::vec2(halfSize.x, -halfSize.y),
+				worldPos + glm::vec2(halfSize.x, halfSize.y),
+				worldPos + glm::vec2(-halfSize.x, halfSize.y)};
+
+			// Добавляем 4 линии (замкнутый прямоугольник)
+			auto addLine = [&](const glm::vec2 &a, const glm::vec2 &b)
+			{
+				lineVertices.insert(lineVertices.end(), {a.x, a.y, color.r, color.g, color.b,
+														 b.x, b.y, color.r, color.g, color.b});
+			};
+
+			addLine(corners[0], corners[1]);
+			addLine(corners[1], corners[2]);
+			addLine(corners[2], corners[3]);
+			addLine(corners[3], corners[0]);
+		}
+
+		if (lineVertices.empty())
+			return;
+
+		auto shader = ShaderManager::Get().LoadShader("assets/shaders/line/debug_line.vert", "assets/shaders/line/debug_line.frag");
+
+		if (shader == nullptr)
+		{
+			utils::Logger::error("Failed to compile shader");
+			std::cerr << "Failed to compile shader.\n";
+			return;
+		}
+
+		// Активируем шейдер и ортогональную проекцию
+		shader->Use();
+
+		// Передаём view-projection из Renderer
+		auto &renderer = Renderer::Get();
+		glm::mat4 vp = renderer.GetViewProjectionMatrix();
+		shader->setMat4("u_ViewProjection", vp);
+
+		// Подготавливаем OpenGL
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glDisable(GL_DEPTH_TEST); // 2D — глубина не нужна
+		glLineWidth(10.0f);
+
+		// Загружаем данные
+		glBindVertexArray(g_debugVao);
+		glBindBuffer(GL_ARRAY_BUFFER, g_debugVbo);
+		glBufferData(GL_ARRAY_BUFFER, lineVertices.size() * sizeof(float), lineVertices.data(), GL_DYNAMIC_DRAW);
+
+		// Рисуем линии
+		glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(lineVertices.size() / 5));
+
+		// Сброс состояния
+		glBindVertexArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glLineWidth(1.0f);
+		glDisable(GL_BLEND);
+		glEnable(GL_DEPTH_TEST); // если используется в 3D
+	}
+
 	// ! Система рендера объектов
 
 	void CameraSystem::Update(entt::registry &registry, Renderer &renderer)
@@ -17,10 +109,10 @@ namespace le
 				Camera2D adjustedCamera = camera;
 
 				RenderParams params;
-				params.Position = transform.Position;
-				params.Scale = transform.Scale;
-				params.Rotation = transform.Rotation;
-				params.Origin = transform.Origin;
+				params.Position = transform.position;
+				params.Scale = transform.scale;
+				params.Rotation = transform.rotation;
+				params.Origin = transform.origin;
 
 				// adjustedCamera.offset = transform.Position;
 				renderer.SetCamera(adjustedCamera, params);
@@ -51,14 +143,7 @@ namespace le
 
 		for (auto entity : view)
 		{
-			if (!registry.all_of<ActiveComponent>(entity))
-			{
-				// Если компонента нет — считаем объект активным (как в Unity)
-				// ИЛИ пропускаем, если ваша логика требует обязательного наличия компонента
-				// Здесь — считаем активным по умолчанию
-				// → не пропускаем, продолжаем рендер
-			}
-			else
+			if (registry.all_of<ActiveComponent>(entity))
 			{
 				const auto &active = registry.get<ActiveComponent>(entity);
 				if (!active.isActive)
@@ -84,37 +169,16 @@ namespace le
 			const auto &sprite = registry.get<Sprite>(entity);
 
 			RenderParams params;
-			params.Position = transform.Position;
-			params.Scale = transform.Scale;
-			params.Rotation = transform.Rotation;
-			params.Origin = transform.Origin;
+			params.Position = transform.position;
+			params.Scale = transform.scale;
+			params.Rotation = transform.rotation;
+			params.Origin = transform.origin;
 
 			if (sprite.Sprite)
 			{
 				renderer.RenderSprite(*sprite.Sprite, params);
 			}
 		}
-	}
-
-	// ! Система передвижения объектов
-	void MovementSystem::Update(SpatialPartitioning &spatialPartitioning)
-	{
-		auto &registry = ECS::Get().GetRegistry();
-		auto view = registry.view<Transform, ActiveComponent>();
-
-		view.each([&](auto entity, Transform &transform, const ActiveComponent &active)
-				  {
-		if (!active.isActive)
-		{
-			return;
-		}
-
-		/*
-		if (transform.GetChanged())
-		{
-			spatialPartitioning.UpdateObjectPosition(entity, transform.Position);
-			transform.SetChanged(false); // ! Сбрасываем флаг
-		}*/ });
 	}
 
 	// ! Система скриптов
@@ -208,14 +272,14 @@ namespace le
 			auto &transform = view.get<Transform>(entity);
 			auto &rb = view.get<Rigidbody2D>(entity);
 
-			if (rb.isKinematic || rb.isStatic)
+			if (rb.GetKinematic() || rb.GetStatic())
 				continue;
 
 			// Обновляем скорость: v = v + a * dt
 			rb.velocity += rb.acceleration * dt;
 
 			// Обновляем позицию: p = p + v * dt
-			transform.Position += rb.velocity * dt;
+			transform.position += rb.velocity * dt;
 
 			// Сбрасываем ускорение (обычно силы прикладываются каждый кадр)
 			rb.acceleration = glm::vec2(0.0f);
@@ -231,37 +295,51 @@ namespace le
 			auto &rb = view.get<Rigidbody2D>(entity);
 			auto &collider = view.get<BoxCollider2D>(entity);
 
-			if (rb.isKinematic || rb.isStatic)
+			if (rb.GetKinematic() || rb.GetStatic())
 				continue;
 
-			glm::vec2 worldPos = transform.Position + collider.offset;
+			glm::vec2 worldPos = transform.position + collider.offset;
 			glm::vec2 halfSize = collider.size * 0.5f;
 
 			// Левая граница
 			if (worldPos.x - halfSize.x < 0.0f)
 			{
-				transform.Position.x() = halfSize.x - collider.offset.x;
+				transform.position.x = halfSize.x - collider.offset.x;
 				rb.velocity.x = glm::abs(rb.velocity.x) * rb.restitution;
 			}
 			// Правая граница
 			if (worldPos.x + halfSize.x > m_worldWidth)
 			{
-				transform.Position.x() = m_worldWidth - halfSize.x - collider.offset.x;
+				transform.position.x = m_worldWidth - halfSize.x - collider.offset.x;
 				rb.velocity.x = -glm::abs(rb.velocity.x) * rb.restitution;
 			}
 			// Верхняя граница
 			if (worldPos.y - halfSize.y < 0.0f)
 			{
-				transform.Position.y() = halfSize.y - collider.offset.y;
+				transform.position.y = halfSize.y - collider.offset.y;
 				rb.velocity.y = glm::abs(rb.velocity.y) * rb.restitution;
 			}
 			// Нижняя граница
 			if (worldPos.y + halfSize.y > m_worldHeight)
 			{
-				transform.Position.y() = m_worldHeight - halfSize.y - collider.offset.y;
+				transform.position.y = m_worldHeight - halfSize.y - collider.offset.y;
 				rb.velocity.y = -glm::abs(rb.velocity.y) * rb.restitution;
 			}
 		}
+	}
+
+	glm::vec2 getRotatedAABBSize(const glm::vec2 &size, float rotation)
+	{
+		float hw = size.x * 0.5f;
+		float hh = size.y * 0.5f;
+
+		float cosA = std::abs(std::cos(rotation));
+		float sinA = std::abs(std::sin(rotation));
+
+		float newW = hw * cosA + hh * sinA;
+		float newH = hw * sinA + hh * cosA;
+
+		return glm::vec2(newW * 2.0f, newH * 2.0f); // полный размер
 	}
 
 	void PhysicsSystem::ResolveCollisions(entt::registry &registry, float dt)
@@ -272,6 +350,7 @@ namespace le
 		std::vector<entt::entity> entities;
 		std::vector<glm::vec2> positions;
 		std::vector<glm::vec2> velocities;
+		std::vector<float> rotations;
 		std::vector<float> invMasses;
 		std::vector<glm::vec2> halfSizes;
 		std::vector<float> restitutions; // упругость
@@ -280,14 +359,22 @@ namespace le
 
 		for (auto entity : view)
 		{
+			if (registry.all_of<ActiveComponent>(entity))
+			{
+				const auto &active = registry.get<ActiveComponent>(entity);
+				if (!active.isActive)
+					continue;
+			}
+
 			auto &t = view.get<Transform>(entity);
 			auto &rb = view.get<Rigidbody2D>(entity);
 			auto &c = view.get<BoxCollider2D>(entity);
 
 			entities.push_back(entity);
-			positions.push_back(t.Position);
+			positions.push_back(t.position);
 			velocities.push_back(rb.velocity);
-			invMasses.push_back(rb.inverseMass);
+			rotations.push_back(t.rotation);
+			invMasses.push_back(rb.GetMass());
 			halfSizes.push_back(c.size * 0.5f);
 			restitutions.push_back(rb.restitution);
 			frictions.push_back(rb.friction);
@@ -303,7 +390,7 @@ namespace le
 		for (size_t i = 0; i < totalEntities; ++i)
 		{
 			glm::vec2 worldPos = positions[i] + offsets[i];
-			m_grid.InsertGrid(i, worldPos);
+			m_grid.InsertGrid(i, worldPos, halfSizes[i]);
 		}
 
 		// === Собираем все контакты один раз ===
@@ -328,6 +415,8 @@ namespace le
 
 			glm::vec2 worldPosB = positions[j] + offsets[j];
 			Aabb aabbB{worldPosB, halfSizes[j]};
+
+
 
 			// Сначала пробуем обычную коллизию
 			Contact contact = collide(aabbA, aabbB);
@@ -422,28 +511,10 @@ namespace le
 			}
 		}
 
-		for (auto entity : view)
-		{
-			auto &transform = view.get<Transform>(entity);
-			auto &rb = view.get<Rigidbody2D>(entity);
-
-			if (rb.isKinematic || rb.isStatic)
-				continue;
-
-			// Обновляем скорость: v = v + a * dt
-			rb.velocity += rb.acceleration * dt;
-
-			// Обновляем позицию: p = p + v * dt
-			transform.Position += rb.velocity * dt;
-
-			// Сбрасываем ускорение (обычно силы прикладываются каждый кадр)
-			rb.acceleration = glm::vec2(0.0f);
-		}
-
 		// Записываем обратно
 		for (size_t i = 0; i < totalEntities; ++i)
 		{
-			registry.get<Transform>(entities[i]).Position = positions[i];
+			registry.get<Transform>(entities[i]).position = positions[i];
 			registry.get<Rigidbody2D>(entities[i]).velocity = velocities[i];
 		}
 	}

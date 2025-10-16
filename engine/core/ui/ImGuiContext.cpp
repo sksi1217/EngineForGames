@@ -323,12 +323,12 @@ void ImGuiContext::RenderObjectUI(Transform &transform)
 {
 	ImGui::Begin("Object Properties", nullptr, ImGuiWindowFlags_NoCollapse);
 
-	if (ImGui::DragFloat2("Position", &transform.Position.x(), 1.0f))
+	if (ImGui::DragFloat2("Position", &transform.position.x, 1.0f))
 	{
 		// Изменения уже внесены благодаря ссылке
 	}
 
-	if (ImGui::DragFloat2("Origin", &transform.Origin.x, 0.01f, 0.0f, 0.5f))
+	if (ImGui::DragFloat2("Origin", &transform.origin.x, 0.01f, 0.0f, 0.5f))
 	{
 		// То же самое
 	}

@@ -24,7 +24,7 @@ public:
 		auto &rb = GetComponent<le::Rigidbody2D>();
 
 		// Если тело кинематическое или статическое — не управляем
-		if (rb.isKinematic || rb.isStatic)
+		if (rb.GetKinematic() || rb.GetStatic())
 		{
 			// Но если хочешь управлять кинематикой — см. примечание ниже
 			return;
@@ -49,7 +49,7 @@ public:
 		}
 
 		// Альтернатива: прикладывать силу (для плавного ускорения)
-		rb.acceleration += movement * rb.mass; // если используешь F = ma
+		rb.acceleration += movement * rb.GetMass(); // если используешь F = ma
 
 		// Управление активностью и уничтожением — без изменений
 		if (InputManager::Get().WasKeyPressed(GLFW_KEY_SPACE))

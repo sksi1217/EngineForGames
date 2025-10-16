@@ -10,19 +10,47 @@ Renderer &Renderer::Get()
 
 bool Renderer::IsVisible(const Transform &transform)
 {
-	// Получаем view-projection матрицу
-	glm::mat4 viewProjectionMatrix = GetViewProjectionMatrix();
+	// Предполагаем, что scale — это полный размер объекта (ширина и высота)
+	glm::vec2 halfSize = transform.scale * 0.5f;
 
-	// Преобразуем координаты объекта (учитываем позицию и масштаб)
-	// Создаем vec4, явно указывая все компоненты
-	glm::vec4 clipPos = viewProjectionMatrix * glm::vec4(transform.Position.x(), transform.Position.y(), 0.0f, 1.0f);
+	// Мировые координаты углов AABB (без вращения)
+	glm::vec2 corners[4] = {
+		transform.position + glm::vec2(-halfSize.x, -halfSize.y), // лево-низ
+		transform.position + glm::vec2(halfSize.x, -halfSize.y),  // право-низ
+		transform.position + glm::vec2(halfSize.x, halfSize.y),	  // право-верх
+		transform.position + glm::vec2(-halfSize.x, halfSize.y)	  // лево-верх
+	};
 
-	// Нормализуем координаты
-	glm::vec2 ndc = glm::vec2(clipPos.x, clipPos.y) / clipPos.w;
+	glm::mat4 vp = GetViewProjectionMatrix();
 
-	// Проверяем, находится ли объект в пределах видимой области
-	return (ndc.x >= -1.0f && ndc.x <= 1.0f &&
-			ndc.y >= -1.0f && ndc.y <= 1.0f);
+	// Преобразуем углы в NDC и находим общий bounding box в NDC
+	float minNdcX = std::numeric_limits<float>::max();
+	float maxNdcX = std::numeric_limits<float>::lowest();
+	float minNdcY = std::numeric_limits<float>::max();
+	float maxNdcY = std::numeric_limits<float>::lowest();
+
+	for (const auto &worldPos : corners)
+	{
+		glm::vec4 clip = vp * glm::vec4(worldPos.x, worldPos.y, 0.0f, 1.0f);
+		if (clip.w <= 0.0f) // за камерой (в 2D редко, но возможно)
+		{
+			// Можно считать видимым, чтобы не пропустить, или обработать особо
+			// Для простоты — пропускаем нормализацию
+			continue;
+		}
+		glm::vec2 ndc = glm::vec2(clip.x, clip.y) / clip.w;
+
+		minNdcX = std::min(minNdcX, ndc.x);
+		maxNdcX = std::max(maxNdcX, ndc.x);
+		minNdcY = std::min(minNdcY, ndc.y);
+		maxNdcY = std::max(maxNdcY, ndc.y);
+	}
+
+	// Проверяем пересечение с видимой областью [-1, 1] x [-1, 1]
+	bool intersects = !(maxNdcX < -1.0f || minNdcX > 1.0f ||
+						maxNdcY < -1.0f || minNdcY > 1.0f);
+
+	return intersects;
 }
 
 // Конструктор: инициализация буферов и обновление проекции
@@ -134,7 +162,6 @@ void Renderer::RenderSprite(const Texture2D &texture, const RenderParams &params
 {
 	m_BatchQueue.emplace_back(&texture, params);
 }
-
 #pragma endregion
 
 #pragma region Batch
@@ -219,6 +246,8 @@ void Renderer::EndBatch()
 #pragma endregion
 
 #pragma region Рисования
+
+
 
 /*
 void Renderer::DrawDebugGrid(SpatialPartitioning &grid, const glm::vec4 &color)

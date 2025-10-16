@@ -74,24 +74,27 @@ void Engine::Initialize()
 
 	Object entity = Object::CreateObject(registry);
 	auto &transform = entity.GetComponent<Transform>();
-	transform.Position = {100, 200};
-	transform.Scale = {100, 100};
+	transform.position = {100, 200};
+	transform.scale = {300, 300};
+	transform.rotation = 45;
 	entity.AddComponent<Sprite>(texture.get());
 	entity.AddComponent<le::Rigidbody2D>();
+	entity.GetComponent<le::Rigidbody2D>().SetMass(1);
+
 	entity.AddComponent<le::BoxCollider2D>();
-	entity.GetComponent<le::BoxCollider2D>().size = {100, 100};
+	entity.GetComponent<le::BoxCollider2D>().size = {300, 300};
 	entity.AddScript<ExampleScript>();
 
 	Object entity1 = Object::CreateObject(registry);
 	auto &transform1 = entity1.GetComponent<Transform>();
-	transform1.Position = {600, 200};
-	transform1.Scale = {100, 100};
+	transform1.position = {600, 200};
+	transform1.scale = {300, 300};
 	entity1.AddComponent<Sprite>(texture.get());
 	entity1.AddComponent<le::Rigidbody2D>();
-
-	// entity1.GetComponent<le::Rigidbody2D>().SetMass(40);
+	entity1.GetComponent<le::Rigidbody2D>().SetKinematic(true);
+	entity1.GetComponent<le::Rigidbody2D>().SetMass(1);
 	entity1.AddComponent<le::BoxCollider2D>();
-	entity1.GetComponent<le::BoxCollider2D>().size = {100, 100};
+	entity1.GetComponent<le::BoxCollider2D>().size = {300, 300};
 	entity1.AddScript<Script>();
 	entity.GetScript<ExampleScript>().targetEntity = entity1.entity;
 }
@@ -148,6 +151,7 @@ void Engine::Draw()
 
 	// ! Обновление всех систем
 	renderSystem.Update();
+	m_debugDrawSystem.Update(ECS::Get().GetRegistry());
 
 	Renderer::Get().EndBatch();
 
